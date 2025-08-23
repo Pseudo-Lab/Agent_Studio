@@ -1,4 +1,4 @@
-# 🎩 AgentStudio — 10th-template
+# 🔨 AgentStudio
 
 <h1 align="center"> AgentStudio </h1>
 
@@ -14,7 +14,7 @@
 </div>
 <br>
 
-> 🚀 AgentStudio — 가짜연구소 10th 프로젝트  
+> 🔨 AgentStudio
 > "함께 만드는 우연한 혁명(Serendipity Revolution)"  
 > 진실함과 신뢰를 바탕으로 AI/DS 혁신 커뮤니티와 기술 실험을 진행합니다.
 
