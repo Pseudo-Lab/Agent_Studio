@@ -1,6 +1,6 @@
-# 10th-template
+# 🎩 AgentStudio — 10th-template
 
-<h1 align="center"> 10th Template </h1>
+<h1 align="center"> AgentStudio </h1>
 
 <div align="center">
 <a href="https://pseudo-lab.com"><img src="https://img.shields.io/badge/PseudoLab-S10-3776AB" alt="PseudoLab"/></a>
@@ -14,51 +14,111 @@
 </div>
 <br>
 
-<!-- sheilds: https://shields.io/ -->
-<!-- hits badge: https://hits.seeyoufarm.com/ -->
+> 🚀 AgentStudio — 가짜연구소 10th 프로젝트  
+> "함께 만드는 우연한 혁명(Serendipity Revolution)"  
+> 진실함과 신뢰를 바탕으로 AI/DS 혁신 커뮤니티와 기술 실험을 진행합니다.
 
-> Welcome to OOO repository! We aim to OOO, offering tools and frameworks for OOO, OOO, and OOO. Join us in advancing the field of OOO through open collaboration and innovation!
+---
 
-🚀 {{프로젝트명}} — 가짜연구소 템플릿 프로젝트
-“함께 만드는 우연한 혁명(Serendipity Revolution)”
-진실함과 신뢰를 바탕으로 AI/DS 혁신 커뮤니티와 기술 실험을 진행합니다.
+## 👥 역동적인 팀 소개 (Dynamic Team)
+
+| 역할 | 이름 | 기술 스택 배지 | 주요 관심 분야 |
+|------|------|--------------|--------------|
+| **Project Manager** | 김재현 | ![Python](https://img.shields.io/badge/Python-Expert-3776AB) ![LangGraph](https://img.shields.io/badge/LangGraph-FF6B6B) | Agent 개발 및 AI PoC |
+| **Member** | 모집중 | ![AI](https://img.shields.io/badge/AI-Agent-4285F4) ![RAG](https://img.shields.io/badge/RAG-Advanced-003B57) | AI Agent Architecture |
+
+---
 
 ## 🌟 프로젝트 목표 (Project Vision)
-_"이론에서 실전까지, 함께 성장하는 AI 실험실"_  
-- Graph-based RAG 스터디 및 프로젝트
-- 개인 성장과 집단 지혜의 시너지 창출
-- 오픈소스 정신을 바탕으로 한 지식 공유 문화
-- 실패를 성공의 디딤돌로 만드는 실험적 접근
-- 논문 리뷰 프로젝트 — 최신 AI 논문 분석, 토론, 실험 재현
-- 책 기반 스터디 — 머신러닝/데이터사이언스 주요 서적 공동 학습 및 적용
-- 오픈소스 프로젝트 — AI·데이터 처리 관련 라이브러리 개발 및 개선
-- 컨퍼런스 논문 투고 — 최신 연구 수행 및 국제 학회 제출 준비
+_"이론에서 실전까지, 함께 성장하는 AI Agent 실험실"_  
 
+- LangGraph 기반 멀티 에이전트 아키텍처 설계 및 구현  
+- 매주 Agent 관련 논문·기술 학습 및 실전 적용  
+- 12주간 완성도 높은 Agent 프로덕트 제작  
+- 기획 → Core 개발 → Reflection → 개선 사이클  
+- 최신 Agent 논문 리뷰 및 A/B 테스트  
+- 실패 원인 탐구 및 개선 방법 제시  
+- 바이브 코딩과 AI 툴 활용한 생산성 향상  
+- 오픈소스 정신을 바탕으로 한 지식 공유 문화  
 
-## 🧑 역동적인 팀 소개 (Dynamic Team)
+---
 
-| 역할          | 이름 |  기술 스택 배지                                                                 | 주요 관심 분야                          |
-|---------------|------|-----------------------------------------------------------------------|----------------------------------------|
-| **Project Manager** | 김찬란 | ![Python](https://img.shields.io/badge/Python-Expert-3776AB) ![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C) | 생성형 AI/추천 시스템 최적화             |
-| **Member** | 레오나르도 다빈치 | ![SQL](https://img.shields.io/badge/SQL-Advanced-003B57) ![BigQuery](https://img.shields.io/badge/BigQuery-4285F4) | 데이터 파이프라인 설계                  |
+## 🧑 빌더 소개 (Builder)
 
+- 안녕하세요, AI Service Engineer **김재현**입니다.  
+- 현재 Agent 개발 및 AI PoC, Microsoft AI 기술을 지원하고 있습니다.  
+- GitHub: [jh941213](https://github.com/jh941213)  
+- Notion: [김재현](https://www.notion.so/800046740e6f48719d0092577bed089e?pvs=21)  
+
+---
+
+## 📝 모집 대상
+
+> 💡 이런 변화를 원한다면 함께해요!
+> 
+> "나태해진 나에게 트리거를 주고싶은 분"
+
+### 필수 요건:
+- LLM, RAG, Agent 분야에 대한 기본 이해 (필수)
+  - LangChain, AutoGen, LLamaIndex, openai agents, google, sdk, crewai 등 프레임워크 1개이상 설명 가능한 정도
+- 오프라인 참여가 가능하신 분 (최대한 오프라인 위주의 빠른 스프린트 진행 예정)
+- 본인 자기계발을 위해 시간(평일저녁, 주말), 돈(리소스 비용) 투자 가능하신 분
+- 다양한 방법론(Paper)과 SNS를 통해 신기술을 팔로업하고, 구현해보고 싶은 분
+
+### ⏰ 활동 기간 및 모임
+- 첫 모임: 날짜 / 시간 / 장소
+- 정기 모임: 매주 토요일 오전 12시 (장소협의)  
+
+---
+
+## 👥 팀 소개
+
+### 1. 스터디/프로젝트 내용
+- 매주 Agent 관련 논문·기술 학습  
+- 12주간 완성도 높은 프로덕트 제작  
+- 기획 → Core 개발 → Reflection → 개선 사이클  
+
+### 2. 목적
+- 최신 Agent 논문 리뷰 및 A/B 테스트  
+- 실패 원인 탐구 및 개선 방법 제시  
+- 바이브 코딩과 AI 툴 활용한 생산성 향상  
+
+### 3. 가설
+- AI Agent 역량 체득 → 포트폴리오 강화  
+- 리서치 중심 트렌디한 개발 경험  
+- 바이브 코딩과 AI를 통한 생산성 상승과 새로운 개발 Cycle 학습  
+- 1인 창업 가능한 수준의 역량 확보  
+
+### 4. 주제 목표
+- 하나 이상의 완성도 높은 프로덕트 제작  
+- 컨퍼런스, 세미나 발표 및 GitHub 임팩트  
+- 대회 참가 및 입상 목표  
+  [K intelligence 해커톤 2025](https://dacon.io/competitions/official/236553/overview/schedule)  
+
+---
 
 ## 🚀 프로젝트 로드맵 (Project Roadmap)
 ```mermaid
 gantt
-    title 2025 AI 프로젝트 여정
+    title AgentStudio 2025 AI 프로젝트 여정
     section 핵심 마일스톤
-    이론 연구       :a1, 2025-09-01, 30d
-    MVP 개발        :a2, after a1, 45d
-    프로덕션 적용    :a3, after a2, 30d
+    Kick-off          :a1, 2025-02-01, 7d
+    기획 및 아이디어 도출 :a2, after a1, 7d
+    논문 리뷰/분석     :a3, after a2, 7d
+    아키텍처 설계      :a4, after a3, 14d
+    Core 개발          :a5, after a4, 35d
+    통합 테스트        :a6, after a5, 7d
+    QA 및 고도화      :a7, after a6, 14d
+    최종 발표          :a8, after a7, 7d
     section 부가 활동
-    기술 세미나     :2025-10-15, 7d
-    해커톤         :2025-11-20, 3d
+    기술 세미나       :2025-03-15, 7d
+    해커톤 참가       :2025-04-20, 3d
 ```
 
+---
 
 ## 🛠️ 우리의 개발 문화 (Our Development Culture)
-**우리의 개발 문화**  
+
 ```python
 class CollaborationFramework:
     def __init__(self):
@@ -76,74 +136,149 @@ class CollaborationFramework:
         3️⃣ 금요일: 데모데이 (실제 적용 사례 발표)"""
 ```
 
+---
 
-## 📈 성과 지표 (Achievement Metrics)
-**2024 주요 KPI**  
-| 지표                     | 목표치 | 현재 달성률 |
-|--------------------------|--------|-------------|
-| 커밋 수                  | 1,200  | 83%         |
-| 이슈 해결률              | 95%    | 89%         | 
-| 기술 블로그 게시물       | 24편   | 15편        |
-| 오픈소스 기여도          | 8회    | 5회         |
+## 👥 1인당 역할 분담 기준 가이드
 
+| 유형 | 14주 기준 최소 책임 기준 |
+|------|----------------------|
+| **논문 리뷰** | 1인당 2~3편 (최신 Agent/LLM/RAG 관련 논문 리뷰/정리본/발표 필수) |
+| **책 기반 스터디** | Agent 위주 책 (자율적) |
+| **기술문서/블로그 번역** | 에이전트 개발시 적극 활용 |
+| **콘텐츠/블로그 작성** | 자유롭게 작성 |
+| **논문 구현** | 자유롭게 구현 |
+| **Agent 개발** | 코어 기능/프롬프트 엔지니어링/인프라 중 1~2개 <br>ex): "프롬프트 설계", "API 래퍼 개발", "MCP 통합" |
+| **AI 서비스 MVP 개발** | 1인당 핵심 기능 1~2개 <br>ex) UI/UX 1안, API 모듈, 데이터 파이프라인, 배포 자동화 |
+| **테스트/QA** | 통합 QA 라운드 2회 이상 참여 (QA는 필수 참여) |
 
-## 💻 주차별 활동 (Activity History)
+> ✍️ ***활용 팁**: 각 실험 목표와 역할 기준은 인원과 기간에 따라 빌더가 자연스럽게 조정 가능합니다.*
 
-| 날짜 | 내용 | 발표자 | 
-| -------- | -------- | ---- |
-| 2025/02/ | OT       |      |
-| 2025/02/ |  Part 1. | 미정 | 
-| 2025/02/ |  Part 2. | 미정 | 
-| 2025/02/ |  Part 3. | 미정 | 
-| 2025/03/ |  Part 4. | 미정 | 
-| 2025/03/ |  Part 5. | 미정 | 
+---
 
+## 🔗 프로젝트 결과 & 공유
 
+- 발표 자료, 학습 요약, 문제/발견/후기 노션 페이지 or GitHub Issue에 아카이빙
+- 오픈 기록/후기/SNS 링크 등 외부 확산 증빙(선택)
+- 회고/칭찬/감사/질문 모음 페이지 운영
+
+---
+
+## 💻 주차별 활동 계획 (Weekly Activity Plan)
+
+> 매지컬 위크, 개발 일정에 따라 조금씩 상이할 수 있습니다. 기술(Paper) 발표 주간은 따로 Notice 후 진행합니다.
+
+| **주차** | **담당자** | **주제/분량** | **발표/실험/리뷰 내용** | **결과물 유형** | **비고(가설, 실험 등)** |
+|---------|-----------|-------------|-------------------|--------------|-------------------|
+| 1주차 | 전원 | kick-off / 기획 | 아이스브레이킹 / 기획 | 노션, github 에 아이디어 정리 | "레퍼런스 참고 우리의방향은?" |
+| 2주차 | 전원 | 기획 | 기획 아이디어 도출 | 노션, github 에 아이디어 정리 |  |
+| 3주차 | 전원 | 분석 | 최신 Agent 논문 리뷰(2~3편), 아키텍처 벤치마킹 | 리뷰 발표, 정리 문서 | 구현 가능성/한계 분석 |
+| 4주차 | 전원 | 설계 | 아키텍처 설계, 리소스/비용 산정 | Mermaid 다이어그램, 설계서 | MVP 범위 정의 |
+| 5주차 | 전원 | 설계 | 모듈별 기능 분해, 담당자 배정, 개발환경 세팅 | 초기 개발환경 정리본 | Repo/CI/CD 세팅 |
+| 6주차 | 전원 | 개발 | Agent Core 프로토타입 구현 | 코드 Repo, 테스트 결과 |  |
+| 7주차 | 전원 | 개발 | RAG/Memory/프롬프팅/MCP 모듈 구현 및 통합 | 코드 Repo, 테스트 결과 |  |
+| 8주차 | 전원 | 개발 | Interaction Layer(API/CLI/UI) 구현 | API 문서, Mockup Swagger/Postman |  |
+| 9주차 | 전원 | 개발 | 통합 테스트 | 테스트 리포트, 개선안 (QA) | 실패 케이스 중심 피드백 |
+| 10주차 | 전원 | 개발 | 최적화, A/B 테스트 (Prompt, Agent 구조) |  |  |
+| 11주차 | 전원 | QA/고도화 | 통합된 기능 QA, 버그 수정 |  |  |
+| 12주차 | 전원 | 배포 환경 구축 | Azure, Docker 셋팅 | 문서 정리 |  |
+| 13주차 | 전원 | 실증 테스트 | 가짜연구소 또는 지인을 통한 실증테스트 | 테스트 피드백 정리 | 피드백 중심의 빠른 수정 반영 |
+| 14주차 | 전원 | 최종 발표 및 회고 | 프로젝트 최종 발표, 개인별 회고 공유 | 발표자료, 회고록, 영상 Demo | 개인 성장 포인트 공유 |
+
+---
 
 ## 💡 학습 자원 (Learning Resources)
-**우리가 만든 지식 허브**  
-- [AI Playbook](https://github.com/your-org/ai-playbook): 150+ 페이지의 실전 가이드
-- [MLOps Pipeline Template](https://github.com/your-org/mlops-template): 재사용 가능한 인프라 코드
-- [Failure Journal](https://your-org.github.io/failure-journal): 50+개의 실패 사례 분석 [31][34]
 
+**우리가 만든 지식 허브**
+
+- [AgentStudio Core Repo](https://github.com/Pseudo-Lab/AgentStudio): Agent 서버, 멀티 에이전트, 데이터 파이프라인, 인프라
+- [System Architecture Docs](https://github.com/Pseudo-Lab/AgentStudio/blob/main/README.md): 구성 요소 및 흐름도
+- [Quick Start Guide](https://github.com/Pseudo-Lab/AgentStudio/blob/main/README.md): 개발 환경 설정 가이드
+- LangGraph, AutoGen, Azure 등 공식 문서
+- GitHub, tech blog, SNS 레퍼런스
+- 에이전트 관련 책 (현재 책을 여러권 구매해놔서 같이 보면서 레거시를 익힙니다)
+
+---
+
+## 📚 학습 활동 및 운영 방식
+
+### 학습/실험 진행 방법:
+
+> 💡 오픈 아카데미 원칙: 모든 발표자료, 기록, 코드, 회고는 깃허브/노션/위키에 공개. 청강/질문/피드백 자유
+
+1. **진행 및 발표**
+   - 오프라인 미팅 (디스코드 배정된 Room 에서 회의, 방법론 등 발표) 청강가능
+   - 최소 1인 2~3회 발표(인원 따라 조정)
+   - 발표자료/정리본은 노션 또는 깃허브 Issue에 공유
+
+2. **필수 학습/실험 활동**
+   - 주차별 본인이 학습 / 실험 한 것에 대한 인증 작성
+   - 최소 2개이상 X, LinkedIn 유용한 포스팅 공유
+   - 질문 및 어려운 점 기록/공유 (빠르게 피드백이 될 수 있도록 채널통해 공유)
+
+3. **실험/가설 검증**
+   - 새롭게 시도하거나 검증해보고 싶은 주제/가설 명확히 제시 후 도전
+   - ex) deep research 의 새로운 논문이 나오면 구현해봐도 무방 본인의 에이전트 일정에만 충실하다는 가정
+
+---
 
 ## 🌱 참여 안내 (How to Engage)
-- 빌더로 참여 — 프로젝트 기획·운영 주도
-- 러너로 참여 — 연구·개발·테스트 등 실행
-- 청강 참여 — 공개 세션 참여 가능
+
+- **빌더로 참여** — 프로젝트 기획·운영 주도
+- **러너로 참여** — 연구·개발·테스트 등 실행  
+- **청강 참여** — 공개 세션 참여 가능
 
 ❗️참여 링크: [가짜연구소 디스코드](https://discord.gg/EPurkHVtp2)
-❗️커뮤니케이션 채널: 디스코드 #{{채널명}}
+❗️커뮤니케이션 채널: 디스코드 #Room-GH
 
-**누구나 청강을 통해 모임을 참여하실 수 있습니다.**  
+**누구나 청강을 통해 모임을 참여하실 수 있습니다.**
+
 1. 특별한 신청 없이 정기 모임 시간에 맞추어 디스코드 #Room-GH 채널로 입장
-2. Magical Week 중 행사에 참가
+2. Magical Week 중 행사에 참가  
 3. Pseudo Lab 행사에서 만나기
 
-## Acknowledgement 🙏
+---
 
-이 프로젝트는 가짜연구소 Open Academy로 진행됩니다.
-여러분의 참여와 기여가 ‘우연한 혁명(Serendipity Revolution)’을 가능하게 합니다. 모두에게 깊은 감사를 전합니다.
-OOO is developed as part of Pseudo-Lab's Open Research Initiative. Special thanks to our contributors and the open source community for their valuable insights and contributions.
+## 🙏 Acknowledgement
 
-## About Pseudo Lab 👋🏼</h2>
+이 프로젝트는 **가짜연구소 Open Academy**로 진행됩니다.
+여러분의 참여와 기여가 '우연한 혁명(Serendipity Revolution)'을 가능하게 합니다. 모두에게 깊은 감사를 전합니다.
 
-[Pseudo-Lab](https://pseudo-lab.com/) is a non-profit organization focused on advancing machine learning and AI technologies. Our core values of Sharing, Motivation, and Collaborative Joy drive us to create impactful open-source projects. With over 5k+ researchers, we are committed to advancing machine learning and AI technologies.
+AgentStudio is developed as part of Pseudo-Lab's Open Research Initiative. Special thanks to our contributors and the open source community for their valuable insights and contributions.
 
-<h2>Contributors 😃</h2>
-<a href="https://github.com/Pseudo-Lab/10th-template/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=Pseudo-Lab/10th-template" />
+---
+
+## 👋 About Pseudo Lab
+
+[Pseudo-Lab](https://pseudo-lab.com/)은 머신러닝과 AI 기술 발전을 위한 비영리 단체입니다.
+핵심 가치: **Sharing, Motivation, Collaborative Joy**
+5k+ 연구자가 참여하는 글로벌 커뮤니티로, 머신러닝과 AI 기술 발전에 기여하고 있습니다.
+
+---
+
+## 😃 Contributors
+
+<a href="https://github.com/Pseudo-Lab/AgentStudio/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=Pseudo-Lab/AgentStudio" />
 </a>
-<br><br>
 
-<h2>License 🗞</h2>
+---
+
+## 🗞 License
 
 This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
 
-🚩 추가 팁 (Usage Tips)
-- 각 항목 내 {{ }} 표시된 부분을 프로젝트에 맞게 꼭 수정하세요.
-- 불필요한 프로젝트 유형 예시는 제거하거나 교체해 명확하게 하세요.
-- 로드맵과 활동내역 부분에 Mermaid 다이어그램 등을 이용해 시각적으로 표현하는 것을 추천합니다.
-- 체크박스(✅)와 표를 적절히 활용하면 진행 상황 한눈에 파악이 쉽습니다.
-- ‘빌더’와 ‘러너’의 역할 분담과 상호 피드백 문화 강화에 README 내 문장으로 강조를 절대 잊지 마세요.
-- README가 단순 안내서 이상으로 공동체 철학과 가치를 담는 협업 선언문임을 인지하고, 누구나 읽고 이해하기 쉽도록 간결 명료하게 작성하세요.
+---
+
+🚩 **Usage Tips**
+
+- 각 항목 내 `{{ }}` 표시된 부분을 프로젝트에 맞게 꼭 수정하세요
+- 불필요한 프로젝트 유형 예시는 제거하거나 교체해 명확하게 하세요
+- 로드맵과 활동내역 부분에 Mermaid 다이어그램 등을 이용해 시각적으로 표현하는 것을 추천합니다
+- 체크박스(✅)와 표를 적절히 활용하면 진행 상황 한눈에 파악이 쉽습니다
+- '빌더'와 '러너'의 역할 분담과 상호 피드백 문화 강화에 README 내 문장으로 강조를 절대 잊지 마세요
+- README가 단순 안내서 이상으로 공동체 철학과 가치를 담는 협업 선언문임을 인지하고, 누구나 읽고 이해하기 쉽도록 간결 명료하게 작성하세요
+
+---
+
+✅ 위 템플릿에 **AgentStudio 프로젝트 설명**과 **상세한 14주 스터디/개발 계획**을 반영해 정리했습니다.  
+원하시면 추가적인 섹션이나 세부 내용을 더 보완해 드릴 수 있습니다!
