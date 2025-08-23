@@ -267,18 +267,6 @@ AgentStudio is developed as part of Pseudo-Lab's Open Research Initiative. Speci
 
 This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
 
----
 
-🚩 **Usage Tips**
 
-- 각 항목 내 `{{ }}` 표시된 부분을 프로젝트에 맞게 꼭 수정하세요
-- 불필요한 프로젝트 유형 예시는 제거하거나 교체해 명확하게 하세요
-- 로드맵과 활동내역 부분에 Mermaid 다이어그램 등을 이용해 시각적으로 표현하는 것을 추천합니다
-- 체크박스(✅)와 표를 적절히 활용하면 진행 상황 한눈에 파악이 쉽습니다
-- '빌더'와 '러너'의 역할 분담과 상호 피드백 문화 강화에 README 내 문장으로 강조를 절대 잊지 마세요
-- README가 단순 안내서 이상으로 공동체 철학과 가치를 담는 협업 선언문임을 인지하고, 누구나 읽고 이해하기 쉽도록 간결 명료하게 작성하세요
 
----
-
-✅ 위 템플릿에 **AgentStudio 프로젝트 설명**과 **상세한 14주 스터디/개발 계획**을 반영해 정리했습니다.  
-원하시면 추가적인 섹션이나 세부 내용을 더 보완해 드릴 수 있습니다!
