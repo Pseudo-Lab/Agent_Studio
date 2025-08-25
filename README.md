@@ -22,10 +22,10 @@
 
 ## 👥 역동적인 팀 소개 (Dynamic Team)
 
-| 역할 | 이름 | 기술 스택 배지 | 주요 관심 분야 |
-|------|------|--------------|--------------|
-| **Project Manager** | 김재현 | ![Python](https://img.shields.io/badge/Python-Expert-3776AB) ![LangGraph](https://img.shields.io/badge/LangGraph-FF6B6B) | Agent 개발 및 AI PoC |
-| **Member** | 모집중 | ![AI](https://img.shields.io/badge/AI-Agent-4285F4) ![RAG](https://img.shields.io/badge/RAG-Advanced-003B57) | AI Agent Architecture |
+| 역할 | 이름 | 소속 | 기술 스택 배지 | 주요 관심 분야 |
+|------|------|-------|--------------|--------------|
+| **Project Manager** | 김재현 | kt ds | ![Python](https://img.shields.io/badge/Python-Expert-3776AB) ![LangGraph](https://img.shields.io/badge/LangGraph-FF6B6B) | Agent 개발 및 AI PoC |
+| **Member** | 모집중 | 가짜연구소 | ![AI](https://img.shields.io/badge/AI-Agent-4285F4) ![RAG](https://img.shields.io/badge/RAG-Advanced-003B57) | AI Agent Architecture |
 
 ---
 
