@@ -257,8 +257,8 @@ AgentStudio is developed as part of Pseudo-Lab's Open Research Initiative. Speci
 
 ## 😃 Contributors
 
-<a href="https://github.com/Pseudo-Lab/AgentStudio/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=Pseudo-Lab/AgentStudio" />
+<a href="https://github.com/Pseudo-Lab/Agent_Studio/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=Pseudo-Lab/Agent_Studio" />
 </a>
 
 ---
