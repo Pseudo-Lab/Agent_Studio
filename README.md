@@ -60,7 +60,7 @@ _"이론에서 실전까지, 함께 성장하는 AI Agent 실험실"_
 
 ### 필수 요건:
 - LLM, RAG, Agent 분야에 대한 기본 이해 (필수)
-  - LangChain, AutoGen, LLamaIndex, openai agents, google, sdk, crewai 등 프레임워크 1개이상 설명 가능한 정도
+  - LangChain, AutoGen, LLamaIndex, openai agents, google, sdk, crewai 등 프레임워크 1개이상 설명가능 구현 가능한 정도
 - 오프라인 참여가 가능하신 분 (최대한 오프라인 위주의 빠른 스프린트 진행 예정)
 - 본인 자기계발을 위해 시간(평일저녁, 주말), 돈(리소스 비용) 투자 가능하신 분
 - 다양한 방법론(Paper)과 SNS를 통해 신기술을 팔로업하고, 구현해보고 싶은 분
