@@ -71,14 +71,8 @@ screenshots/
 logs/
 *.log
 
-# TTS/STT Audio Files (output only)
-output/**/*.wav
-screenshots/**/*.wav
-
-# Keep root reference audio files
-!ansungjae_*.wav
-!imzzang_*.wav
-!output_ref_*.wav
+# TTS/STT Audio Files
+*.wav
 
 # ─────────────────────────────────────────────────────────────────────────────────
 # IDE & Editors
