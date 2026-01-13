@@ -1,0 +1,39 @@
+# Character Configuration for Kiosk Agent TTS
+# 캐릭터별 음성 및 개성 설정
+
+characters:
+  - id: ansungjae
+    name: 안성재
+    nickname: 안성재 셰프
+    ref_audio: ansungjae_51_62.wav
+    ref_text: >-
+      얼음판 위에서 거르 걷고 있는 느낌? 근데 부정적인 느낌은 아니에요 
+      모든 게 다 막 완벽하고 편안함을 느끼고 이렇다면은 더 잘못된 거라고 생각해요
+    image_path: /images/ansungjae.jpg
+    completion_messages:
+      - 제가 준비한 건
+      - 정성껏 준비했습니다.
+      - 마음을 담아서,
+      - 자, 여기 있습니다.
+    quit_messages:
+      - 다음에 또 오세요.
+      - 좋은 하루 되세요.
+      - 감사합니다.
+
+  - id: imzzang
+    name: 임짱
+    nickname: 임짱 셰프
+    ref_audio: imzzang_00_15.wav
+    ref_text: >-
+      네 저는 사실 이게 지금 이 결과물을 뭐 음식을 딱 봤을 때 
+      아 이거 맛있겠다 라고 생각이 드셨을 텐데
+    image_path: /images/imzzang.jpg
+    completion_messages:
+      - 자, 맛있게 드세요!
+      - 완성입니다~
+      - 열심히 만들었어요,
+      - 따끈따끈하게 나왔습니다,
+    quit_messages:
+      - 또 놀러오세요~
+      - 다음에 봐요!
+      - 안녕히 가세요~

@@ -1,1 +1,0 @@
-python run_agent.py "방문포장으로 크리스퍼 불닭치킨 주문해줘"

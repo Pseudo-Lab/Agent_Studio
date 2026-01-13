@@ -1,0 +1,29 @@
+# Kiosk Agent Backend Dependencies
+
+# Core
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+pydantic>=2.0.0
+python-dotenv>=1.0.0
+pyyaml>=6.0.0
+
+# LLM Providers
+google-genai>=0.8.0
+openai>=1.0.0
+requests>=2.31.0
+
+# Image Processing
+pillow>=10.0.0
+
+# Agent Framework
+langgraph>=0.2.0
+
+# Voice (optional)
+mlx-audio>=0.1.0; platform_system == "Darwin"
+google-cloud-speech>=2.0.0
+google-auth>=2.0.0
+
+# Development
+pytest>=7.0.0
+black>=24.0.0
+ruff>=0.3.0

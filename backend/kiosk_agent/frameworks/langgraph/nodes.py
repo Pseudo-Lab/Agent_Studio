@@ -1,0 +1,220 @@
+"""Node implementations for LangGraph Kiosk Agent workflow."""
+
+from __future__ import annotations
+
+from typing import Literal, Optional
+
+from PIL import Image
+
+from ...types import AgentState, HistoryEntry
+from ...utils import get_logger, compute_difference, compute_screen_id, parse_analysis_response, build_analysis_prompt
+from ...utils.common import format_thought_history
+from .prompts import USER_PROMPT_TEMPLATE
+
+logger = get_logger(__name__)
+
+
+class NodeMixin:
+    """
+    Mixin class providing node implementations for KioskAgent.
+    
+    Nodes:
+    - vlm: Vision-Language Model reasoning
+    - execute: ADB command execution
+    - router: Route decision based on execution results
+    - human: Human-in-the-loop interaction
+    - analyze: Situation analysis when stuck
+    """
+
+    def _vlm_node(self, state: AgentState) -> AgentState:
+        """
+        VLM reasoning node.
+        
+        Captures screen, sends to VLM with history context,
+        and receives proposed action.
+        """
+        screenshot = self._get_screen()
+        
+        thought_history = format_thought_history(state.get("history", []))
+        full_instruction = USER_PROMPT_TEMPLATE.format(
+            thought_history=thought_history,
+            user_instruction=state["instruction"]
+        )
+        
+        model_action = self.model_client.propose_action(full_instruction, screenshot.image)
+        payload = model_action.payload
+        
+        logger.debug(f"VLM output: action={payload.get('action')}, thought={payload.get('thought', '')[:50]}")
+        
+        return {
+            "model_action": model_action,
+            "payload": payload,
+            "thought": payload.get("thought"),
+            "status": "thinking",
+            "pre_action_path": screenshot.path,
+            "iteration": state.get("iteration", 0) + 1,
+        }
+
+    def _execute_node(self, state: AgentState) -> AgentState:
+        """
+        Execute ADB command node.
+        
+        Translates model action to ADB commands and executes them.
+        """
+        model_action = state.get("model_action")
+        if model_action is None:
+            raise RuntimeError("Execute node received no model action")
+            
+        pre_screen = self._get_screen()
+        adb_result = self.translator.execute(model_action.payload, img_size=pre_screen.image.size)
+        post_screen = self._capture_screen()
+        
+        logger.debug(f"Executed ADB commands: {len(adb_result.commands)} commands")
+        
+        return {
+            "status": "executed",
+            "post_action_path": post_screen.path,
+            "last_adb_commands": adb_result.commands,
+        }
+
+    def _router_node(self, state: AgentState) -> AgentState:
+        """
+        Router node.
+        
+        Evaluates execution results, computes progress,
+        updates history, and determines next route.
+        """
+        post_screen_path = state.get("post_action_path")
+        pre_screen_path = state.get("pre_action_path")
+        
+        new_screen_id = compute_screen_id(post_screen_path)
+        
+        # Compute difference & progress
+        diff = compute_difference(pre_screen_path, post_screen_path)
+        progress = bool(diff is not None and diff >= self.progress_threshold)
+        
+        # Update history
+        iteration = state.get("iteration", 0)
+        new_entry: HistoryEntry = {
+            "iteration": iteration,
+            "payload": state.get("payload", {}),
+            "thought": state.get("thought"),
+            "adb_commands": state.get("last_adb_commands", []),
+            "progress": progress,
+            "screen_id": new_screen_id,
+            "pre_action_path": pre_screen_path,
+            "post_action_path": post_screen_path,
+        }
+        history = list(state.get("history", [])) + [new_entry]
+        
+        # Determine status
+        status = "progress_made" if progress else "stagnant"
+        payload = state.get("payload", {})
+        
+        if payload.get("action") == "FINISH":
+            status = "task_complete"
+        elif payload.get("interrupt") or payload.get("action") == "INTERRUPT":
+            status = "needs_human"
+
+        # Delegate route decision
+        temp_state: AgentState = {**state, "status": status, "history": history}
+        route = self._determine_route(temp_state)
+        
+        logger.debug(f"Router: status={status}, route={route}, progress={progress}")
+
+        return {
+            "history": history,
+            "status": status,
+            "route": route,
+            "progress": progress,
+            "difference": diff,
+            "current_screen_id": new_screen_id or state.get("current_screen_id"),
+            "last_iteration_id": iteration,
+        }
+
+    def _human_node(self, state: AgentState) -> AgentState:
+        """
+        Human-in-the-loop node (CLI mode).
+        
+        Prompts user for input and optionally executes text input.
+        """
+        logger.info("=" * 50)
+        logger.info(" HUMAN ASSISTANCE REQUIRED ")
+        logger.info("=" * 50)
+        
+        payload = state.get("payload", {})
+        interrupt_data = payload.get("interrupt", {})
+        question = interrupt_data.get("question", "에이전트가 정보를 더 필요로 합니다.")
+        requires_text_input = interrupt_data.get("requires_text_input", False)
+        
+        print(f"\n[Agent]: {question}")
+        user_input = input("\n답변 (종료: quit): ").strip()
+        
+        if user_input.lower() in {"finish", "quit", "exit"}:
+            logger.info("User requested abort")
+            return {
+                "route": "abort",
+                "status": "aborted",
+            }
+        
+        # Execute text input if required
+        adb_commands = []
+        if requires_text_input and user_input:
+            logger.info(f"Executing text input: '{user_input}'")
+            try:
+                screen = self._get_screen()
+                input_result = self.translator.execute(
+                    {"action": "INPUT", "value": user_input},
+                    img_size=screen.image.size
+                )
+                adb_commands = input_result.commands
+                self._capture_screen()
+            except Exception as e:
+                logger.warning(f"Text input failed: {e}")
+        
+        combined_instruction = f"{state['instruction']}\n[추가 정보]: {question} -> {user_input}"
+        
+        logger.info("Resuming with human feedback")
+        return {
+            "instruction": combined_instruction,
+            "route": "resume",
+            "status": "human_feedback_applied",
+            "last_adb_commands": adb_commands,
+            "human_decision": user_input,
+        }
+
+    def _analyze_node(self, state: AgentState) -> AgentState:
+        """
+        Analyze node.
+        
+        Analyzes current situation when agent is stuck
+        and suggests next action.
+        """
+        prompt = build_analysis_prompt(state)
+        screen = self._get_screen(refresh=False)
+        raw_analysis = self._invoke_analysis_model(prompt, screen.image)
+        analysis_text, suggested_route, target_idx = parse_analysis_response(raw_analysis)
+        
+        logger.debug(f"Analysis result: route={suggested_route}, target={target_idx}")
+        
+        if suggested_route == "backtrack":
+            return {
+                "analysis": analysis_text,
+                "route": "backtrack",
+                "status": "backtracking",
+                "backtrack_target_index": target_idx,
+            }
+            
+        next_route = "loop" if suggested_route == "loop" and state.get("iteration", 0) < self.max_iterations else "end"
+        status = "needs_retry" if next_route == "loop" else "analyzed"
+        
+        return {
+            "analysis": analysis_text,
+            "route": next_route,
+            "status": status,
+        }
+
+    def _invoke_analysis_model(self, prompt: str, image: Optional[Image.Image]) -> str:
+        """Invoke analysis model."""
+        raw = self.analysis_client.generate(prompt, image)
+        return self.model_client._coerce_raw_text(raw)

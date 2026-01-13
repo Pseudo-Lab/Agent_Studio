@@ -1,3 +1,113 @@
-logs
+# ═══════════════════════════════════════════════════════════════════════════════
+# Kiosk Agent - .gitignore
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# Python
+# ─────────────────────────────────────────────────────────────────────────────────
 __pycache__/
-screenshots
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environments
+.venv/
+.venv_mac/
+venv/
+ENV/
+env/
+.env.local
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# Node.js / Next.js
+# ─────────────────────────────────────────────────────────────────────────────────
+node_modules/
+.next/
+out/
+.nuxt/
+.cache/
+*.tsbuildinfo
+next-env.d.ts
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# Environment & Secrets
+# ─────────────────────────────────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.json
+!web/components.json
+!web/package.json
+!web/package-lock.json
+!web/tsconfig.json
+!backend/config/*.yaml
+
+# Google Cloud Credentials
+gen-lang-client-*.json
+*-credentials.json
+service-account*.json
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# Output Data (generated at runtime)
+# ─────────────────────────────────────────────────────────────────────────────────
+output/
+screenshots/
+logs/
+*.log
+
+# TTS/STT Audio Files (output only)
+output/**/*.wav
+screenshots/**/*.wav
+
+# Keep root reference audio files
+!ansungjae_*.wav
+!imzzang_*.wav
+!output_ref_*.wav
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# IDE & Editors
+# ─────────────────────────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# Testing & Coverage
+# ─────────────────────────────────────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+*.coverage
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# Misc
+# ─────────────────────────────────────────────────────────────────────────────────
+*.bak
+*.tmp
+*.temp
+.cursor/
+*.bmp

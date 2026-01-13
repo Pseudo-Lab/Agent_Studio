@@ -1,69 +1,81 @@
-from __future__ import annotations
+#!/usr/bin/env python3
+"""
+Kiosk Agent CLI runner.
+
+Usage:
+    python run_agent.py "빅맥 세트 주문해줘"
+    python run_agent.py --model gemini "행운버거 주문해줘"
+"""
 
 import argparse
-from pathlib import Path
+import os
 import sys
+from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
-
-from kiosk_agent.src.config import ADBConfig, AgentConfig, ModelConfig, ScreenshotConfig
-from kiosk_agent.src.langgraph_kiosk_agent import KioskAgent
+# Add backend to path
+BACKEND_PATH = Path(__file__).resolve().parent / "backend"
+sys.path.insert(0, str(BACKEND_PATH))
 
 
-def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Run the kiosk GUI agent for a single step.")
-    parser.add_argument("instruction", help="User request the agent should fulfil.")
-    parser.add_argument("--provider", choices=["chatgpt", "gemini", "local_vllm"], default="gemini")
-    parser.add_argument("--device-id", default=None, help="adb device serial if multiple devices are connected.")
-    parser.add_argument("--adb-path", default="adb")
-    parser.add_argument("--screenshot-dir", default="artifacts/screens")
-    # ChatGPT
-    parser.add_argument("--openai-model", default="gpt-4o-mini")
-    # Gemini
-    parser.add_argument("--gemini-model", default="gemini-3-flash-preview")
-    # Local vLLM
-    parser.add_argument("--vllm-base-url", default="http://localhost:8000")
-    parser.add_argument("--vllm-model-name", default="GUI_agent")
-    # parser.add_argument("--vllm-api-key", default=None)
-    return parser
-
-
-def main() -> None:
-    parser = build_parser()
+def main():
+    parser = argparse.ArgumentParser(description="Run Kiosk Agent")
+    parser.add_argument("instruction", help="Instruction to execute")
+    parser.add_argument(
+        "--model", 
+        default="gemini",
+        choices=["gemini", "openai", "local"],
+        help="LLM provider (default: gemini)"
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Print ADB commands without executing"
+    )
     args = parser.parse_args()
-    screenshot_config = ScreenshotConfig(
-        adb_path=args.adb_path,
-        device_id=args.device_id,
-        # output_dir=Path(args.screenshot_dir),
-    )
-    model_config = ModelConfig(
-        provider=args.provider,
-        # openai_model=args.openai_model,
-        # gemini_model=args.gemini_model,
-        # vllm_base_url=args.vllm_base_url,
-        # vllm_model_name=args.vllm_model_name,
-    )
-    adb_config = ADBConfig(
-        adb_path=args.adb_path,
-        device_id=args.device_id,
-    )
-    config = AgentConfig(
-        screenshot=screenshot_config,
-        model=model_config,
-        adb=adb_config,
-    )
     
-    agent = KioskAgent(config)
-    result = agent.forward(args.instruction, thread_id="test_thread")
-    # print("Status:", result.status)
-    # print("Thought:", result.thought)
-    # # print("ADB commands:")
-    # for command in result.adb_commands:
-    #     print(" ", " ".join(command))
-    # if result.screenshot_path:
-    #     print("Screenshot saved to:", result.screenshot_path)
+    # Import after path setup
+    from kiosk_agent import Config
+    from kiosk_agent.frameworks import LangGraphAgent
+    
+    # Configure
+    config = Config.from_env()
+    config.model.provider = args.model
+    
+    # Create and run agent
+    agent = LangGraphAgent(config, dry_run=args.dry_run)
+    
+    print(f"[Agent] Starting with instruction: {args.instruction}")
+    print(f"[Agent] Model: {config.model.provider}")
+    print("-" * 50)
+    
+    # Stream execution
+    for event in agent.stream(args.instruction):
+        if event.thought:
+            print(f"[Step {event.state.get('iteration', 0)}] {event.thought}")
+        if event.requires_human_input:
+            print("\n[HITL] Agent needs input:")
+            interrupt = event.state.get("payload", {}).get("interrupt", {})
+            question = interrupt.get("question", "What should I do?")
+            print(f"  Question: {question}")
+            
+            options = interrupt.get("options", [])
+            if options:
+                print("  Options:")
+                for i, opt in enumerate(options, 1):
+                    print(f"    {i}. {opt}")
+            
+            response = input("\n  Your response: ").strip()
+            if response.lower() in {"quit", "exit", "종료"}:
+                print("[Agent] Aborted by user")
+                break
+            
+            # Resume with response
+            for resume_event in agent.resume(event.state, response):
+                if resume_event.thought:
+                    print(f"[Step {resume_event.state.get('iteration', 0)}] {resume_event.thought}")
+    
+    print("-" * 50)
+    print("[Agent] Execution complete")
 
 
 if __name__ == "__main__":
