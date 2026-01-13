@@ -218,6 +218,30 @@ Open:
 | POST | `/stt/transcribe` | 음성→텍스트 |
 | GET | `/tts/audio/{file}` | TTS 오디오 |
 
+### 🗓️ Roadmap
+
+#### ✅ v1.0.0 (현재)
+- LangGraph 기반 VLA 에이전트
+- TTS/STT 음성 인터페이스
+- Human-in-the-Loop 피드백 시스템
+- Next.js 실시간 대시보드
+
+#### 🔜 v1.1.0 (2026년 1월 예정)
+
+| Framework | Status | Description |
+|-----------|--------|-------------|
+| **Microsoft Agent Framework** | 🚧 개발 중 | Azure AI Agent Service, Semantic Kernel 연동 |
+| **Google ADK** | 🚧 개발 중 | Gemini 네이티브 에이전트 프레임워크 |
+| **CrewAI** | 📋 계획 중 | 멀티 에이전트 협업 워크플로우 |
+
+#### 🎯 Future Plans
+- Planning Mode (태스크 분해 및 계획)
+- Context Management (장기 메모리)
+- On-device Model (경량화 모델)
+- Microservice Architecture
+
+> 📝 자세한 내용은 [RELEASE_NOTES.md](./RELEASE_NOTES.md) 참고
+
 ---
 
 ## 👥 역동적인 팀 소개 (Dynamic Team)
