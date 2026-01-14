@@ -74,6 +74,23 @@ class ChatGPTClient(BaseModelClient):
         logger.debug(f"Raw response: {response.output_text}")
         return response.output_text
 
+    def generate_text(self, prompt: str) -> str:
+        """Text-only generation for Planning mode (no image)."""
+        response = self._client.responses.create(
+            model=self.config.openai_model,
+            input=[
+                {
+                    "role": "system",
+                    "content": "당신은 유용한 도우미입니다. 요구된 형식(JSON)을 정확히 지켜서 응답하세요.",
+                },
+                {"role": "user", "content": prompt},
+            ],
+        )
+        output_text = (response.output_text or "").strip()
+        if not output_text:
+            raise RuntimeError("OpenAI returned an empty response.")
+        return output_text
+
     def encode_image(self, image_path):
         """Encode image file to base64."""
         with open(image_path, "rb") as image_file:

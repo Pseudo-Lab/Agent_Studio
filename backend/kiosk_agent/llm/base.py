@@ -30,6 +30,21 @@ class BaseModelClient(ABC):
     def generate(self, instruction: str, image: Image.Image) -> str:
         """Return the raw model text output."""
 
+    def generate_text(self, prompt: str) -> str:
+        """
+        Text-only generation helper (no image).
+
+        Planning mode uses this to run lightweight reasoning steps such as:
+        - unknown entity detection
+        - plan generation / replanning
+
+        Subclasses SHOULD override this. The default implementation exists so
+        callers have a consistent API surface across providers.
+        """
+        raise NotImplementedError(
+            f"{self.__class__.__name__} does not implement generate_text()."
+        )
+
     def propose_action(self, instruction: str, image: Image.Image) -> ModelAction:
         raw = self.generate(instruction, image)
         raw_text = self._coerce_raw_text(raw)

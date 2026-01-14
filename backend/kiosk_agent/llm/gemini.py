@@ -74,6 +74,30 @@ class GeminiClient(BaseModelClient):
         
         return response.text, width, height
 
+    def generate_text(self, prompt: str) -> str:
+        """
+        Text-only generation for Planning mode.
+
+        We intentionally DO NOT reuse the VLM JSON schema (`GUI_OUTPUT`) here,
+        because planning prompts expect different JSON structures.
+        """
+        types = self._types
+        config = types.GenerateContentConfig(
+            thinking_config=types.ThinkingConfig(thinking_level="low"),
+            # Keep it minimal; planning prompts already constrain output format.
+            system_instruction="당신은 유용한 도우미입니다. 요구된 형식(JSON)을 정확히 지켜서 응답하세요.",
+            response_mime_type="application/json",
+        )
+        response = self._client.models.generate_content(
+            model=self.config.gemini_model,
+            contents=[prompt],
+            config=config,
+        )
+        output_text = (response.text or "").strip()
+        if not output_text:
+            raise RuntimeError("Gemini returned an empty response.")
+        return output_text
+
     def encode_image(self, image_path):
         """Encode image file to bytes."""
         with open(image_path, "rb") as image_file:
