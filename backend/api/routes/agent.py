@@ -29,11 +29,18 @@ sessions = SessionStore(
 )
 _agent: Optional[Any] = None
 _current_model: Optional[str] = None
+_current_planning: Optional[bool] = None
 
 
 def get_agent(model_id: Optional[str] = None, enable_planning: bool = False):
-    """Get or create agent instance with config from environment."""
-    global _agent, _current_model
+    """
+    Get or create agent instance with config from environment.
+    
+    Agent is recreated when:
+    - Model changes
+    - Planning mode changes (graph structure differs)
+    """
+    global _agent, _current_model, _current_planning
     
     # Import here to avoid any module-level issues
     from kiosk_agent.frameworks import KioskAgent as Agent
@@ -46,7 +53,14 @@ def get_agent(model_id: Optional[str] = None, enable_planning: bool = False):
     requested = model_id or os.getenv("DEFAULT_MODEL", "gemini-flash")
     target_model = model_map.get(requested, os.getenv("GEMINI_MODEL", "gemini-3-flash-preview"))
     
-    if _agent is None or _current_model != requested:
+    # Recreate agent if model or planning mode changes
+    needs_rebuild = (
+        _agent is None 
+        or _current_model != requested 
+        or _current_planning != enable_planning
+    )
+    
+    if needs_rebuild:
         # Create config (will read from env automatically)
         config = AgentConfig()
         
@@ -59,19 +73,14 @@ def get_agent(model_id: Optional[str] = None, enable_planning: bool = False):
         if config.model.provider == "chatgpt" and not config.model.openai_api_key:
             raise ValueError("OPENAI_API_KEY 환경변수가 필요합니다.")
         
-        # Create agent (enable_planning will be set per-request)
+        # Create agent with specified planning mode
         enable_tts = os.getenv("AGENT_TTS_ENABLED", "1").lower() in {"1", "true", "yes", "on"}
-        _agent = Agent(config, enable_tts=enable_tts, enable_planning=False)
+        _agent = Agent(config, enable_tts=enable_tts, enable_planning=enable_planning)
         _current_model = requested
-        logger.info(f"Agent initialized: provider={config.model.provider}, model={target_model}")
-    
-    # Update enable_planning for this request (dynamically toggle)
-    if _agent is not None:
-        if _agent.enable_planning != enable_planning:
-            _agent.enable_planning = enable_planning
-            if enable_planning and not _agent._planning_initialized:
-                _agent._init_planning_tools()
-            logger.info(f"Planning Mode: {'enabled' if enable_planning else 'disabled'}")
+        _current_planning = enable_planning
+        
+        mode_str = "Planning Mode" if enable_planning else "Standard Mode"
+        logger.info(f"Agent built: provider={config.model.provider}, model={target_model}, mode={mode_str}")
     
     return _agent
 

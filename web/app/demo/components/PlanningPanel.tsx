@@ -1,8 +1,19 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, ListChecks, Loader2, Globe, SlidersHorizontal, X, CheckCircle2, Circle, ArrowRight } from "lucide-react";
+import { 
+  Search, 
+  ListChecks, 
+  Loader2, 
+  Globe, 
+  SlidersHorizontal, 
+  ChevronDown, 
+  ChevronRight,
+  Check,
+  Circle,
+  ArrowRight,
+} from "lucide-react";
 import type { PlanningState } from "../types";
 
 type Props = {
@@ -13,28 +24,26 @@ type Props = {
 
 const statusConfig = {
   detecting_unknown: {
-    icon: SlidersHorizontal,
-    label: "분석 중",
-    description: "요청에서 모르는 개념을 확인하고 있어요",
+    label: "Analyzing",
+    generating: true,
   },
   web_search_complete: {
-    icon: Globe,
-    label: "검색 완료",
-    description: "웹에서 참고 정보를 가져왔어요",
+    label: "Searching",
+    generating: false,
   },
   web_search_skipped: {
-    icon: Search,
-    label: "검색 생략",
-    description: "추가 검색 없이 바로 계획을 만들어요",
+    label: "Planning",
+    generating: false,
   },
   planning_complete: {
-    icon: ListChecks,
-    label: "실행 중",
-    description: "계획에 따라 진행 중이에요",
+    label: "Executing",
+    generating: false,
   },
 };
 
-export function PlanningPanel({ planningState, isVisible, onClose }: Props) {
+export function PlanningPanel({ planningState, isVisible }: Props) {
+  const [isExpanded, setIsExpanded] = useState(true);
+  
   if (!isVisible || !planningState) return null;
 
   type StatusKey = keyof typeof statusConfig;
@@ -43,166 +52,102 @@ export function PlanningPanel({ planningState, isVisible, onClose }: Props) {
       ? (planningState.status as StatusKey)
       : "detecting_unknown";
   const config = statusConfig[statusKey];
-  const IconComponent = config.icon;
-  const isLoading = statusKey === "detecting_unknown";
-  const isMuted = statusKey === "web_search_skipped";
-
-  const accent = {
-    icon: isMuted ? "text-gray-400" : "text-amber-300",
-    title: isMuted ? "text-gray-300" : "text-amber-300",
-    pill: isMuted
-      ? "bg-white/[0.04] border-white/[0.10] text-gray-300"
-      : "bg-amber-400/10 border-amber-400/20 text-amber-300",
-  };
+  
+  const totalSteps = planningState.plan.length;
+  const completedSteps = planningState.planStepIndex || 0;
+  const hasSteps = totalSteps > 0;
+  const isGenerating = config.generating || (planningState.status !== "planning_complete");
 
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0, y: -20, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: -20, scale: 0.95 }}
-        transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
-        className="w-full p-3 rounded-[24px] border border-white/[0.08] bg-[#141416]/80 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.35)] relative overflow-hidden"
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.2 }}
+      className="w-full"
+    >
+      {/* Cursor-style To-dos Header */}
+      <button
+        type="button"
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="flex items-center gap-2 w-full text-left group"
       >
-        {/* top accent */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-400/35 to-transparent" />
-
-        {/* Header */}
-        <div className="flex items-start justify-between gap-3 mb-3">
-          <div className="flex items-start gap-3 min-w-0">
-            <div className="w-8 h-8 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center flex-shrink-0">
-              {isLoading ? (
-                <Loader2 className={`w-4.5 h-4.5 ${accent.icon} animate-spin`} />
-              ) : (
-                <IconComponent className={`w-4.5 h-4.5 ${accent.icon}`} />
-              )}
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <span className={`text-xs font-bold ${accent.title}`}>{config.label}</span>
-                <span
-                  className={[
-                    "px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest border",
-                    accent.pill,
-                  ].join(" ")}
-                >
-                  PLAN
-                </span>
-              </div>
-              <div className="text-[11px] text-gray-500 leading-relaxed truncate">{config.description}</div>
-            </div>
-          </div>
-          {onClose && (
-            <button
-              type="button"
-              onClick={onClose}
-              className="w-8 h-8 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] hover:border-white/[0.10] transition-colors flex items-center justify-center text-gray-500 hover:text-gray-300 flex-shrink-0"
-              title="닫기"
-            >
-              <X className="w-4 h-4" />
-            </button>
+        {/* Expand/Collapse Icon */}
+        <div className="text-gray-500 group-hover:text-gray-400 transition-colors">
+          {isExpanded ? (
+            <ChevronDown className="w-4 h-4" />
+          ) : (
+            <ChevronRight className="w-4 h-4" />
           )}
         </div>
-
-        {/* Unknown Entities */}
-        {planningState.unknownEntities.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            className="mb-3"
-          >
-            <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-1.5 font-semibold">
-              Unknown
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {planningState.unknownEntities.map((entity, i) => (
-                <motion.span
-                  key={i}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: i * 0.1 }}
-                  className="px-2.5 py-1 text-xs font-semibold bg-amber-400/10 text-amber-200 rounded-lg border border-amber-400/20"
-                >
-                  {entity}
-                </motion.span>
-              ))}
-            </div>
-          </motion.div>
+        
+        {/* List Icon */}
+        <SlidersHorizontal className="w-4 h-4 text-gray-500" />
+        
+        {/* Title with count */}
+        <span className="text-sm text-gray-400">
+          To-dos
+        </span>
+        {hasSteps && (
+          <span className="text-sm text-gray-500 ml-1">
+            {totalSteps}
+          </span>
         )}
+      </button>
 
-        {/* Search Context Preview */}
-        {planningState.searchContext && (
+      {/* To-do Items */}
+      <AnimatePresence>
+        {isExpanded && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            className="mb-3"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
           >
-            <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-1.5 font-semibold">
-              Context
-            </div>
-            <div className="p-3 bg-black/25 rounded-xl border border-white/[0.08] text-xs text-gray-400 line-clamp-3 leading-relaxed">
-              {planningState.searchContext.slice(0, 200)}
-              {planningState.searchContext.length > 200 && "..."}
-            </div>
-          </motion.div>
-        )}
-
-        {/* Plan Steps - To-do checkbox style */}
-        {planningState.plan.length > 0 && planningState.status === "planning_complete" && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-          >
-            <div className="flex items-center justify-between mb-2">
-              <div className="text-[10px] text-gray-500 uppercase tracking-widest font-semibold">
-                To-do
-              </div>
-              <div className="text-[10px] text-amber-400/80 font-bold">
-                {planningState.planStepIndex}/{planningState.plan.length}
-              </div>
-            </div>
-            <div className="space-y-1.5">
+            <div className="mt-2 ml-6 space-y-1">
+              {/* Steps */}
               {planningState.plan.map((step, i) => {
-                const isCompleted = i < planningState.planStepIndex;
-                const isCurrent = i === planningState.planStepIndex;
-                const isPending = i > planningState.planStepIndex;
-                
+                const isCompleted = i < completedSteps;
+                const isCurrent = i === completedSteps && planningState.status === "planning_complete";
+                const isPending = i > completedSteps || (i === completedSteps && planningState.status !== "planning_complete");
+
                 return (
                   <motion.div
                     key={i}
-                    initial={{ opacity: 0, x: -10 }}
+                    initial={{ opacity: 0, x: -5 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.3 + i * 0.1 }}
-                    className={`flex items-start gap-2.5 py-1 px-2 rounded-lg transition-colors ${
-                      isCurrent ? "bg-amber-400/10 border border-amber-400/20" : ""
-                    }`}
+                    transition={{ delay: i * 0.05 }}
+                    className="flex items-start gap-2 py-0.5"
                   >
                     {/* Step indicator */}
                     <div className="flex-shrink-0 mt-0.5">
-                      {isCompleted && (
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                      )}
-                      {isCurrent && (
+                      {isCompleted ? (
+                        <div className="w-4 h-4 rounded-full bg-transparent flex items-center justify-center">
+                          <Check className="w-3.5 h-3.5 text-gray-500" strokeWidth={2.5} />
+                        </div>
+                      ) : isCurrent ? (
                         <motion.div
-                          animate={{ scale: [1, 1.1, 1] }}
+                          animate={{ opacity: [0.5, 1, 0.5] }}
                           transition={{ duration: 1.5, repeat: Infinity }}
+                          className="w-4 h-4 flex items-center justify-center"
                         >
-                          <ArrowRight className="w-4 h-4 text-amber-400" />
+                          <ArrowRight className="w-3.5 h-3.5 text-amber-400" />
                         </motion.div>
-                      )}
-                      {isPending && (
-                        <Circle className="w-4 h-4 text-gray-600" />
+                      ) : (
+                        <div className="w-4 h-4 flex items-center justify-center">
+                          <Circle className="w-3 h-3 text-gray-600" />
+                        </div>
                       )}
                     </div>
                     
                     {/* Step text */}
                     <span
-                      className={`text-xs leading-relaxed line-clamp-2 ${
+                      className={`text-sm leading-relaxed ${
                         isCompleted
-                          ? "text-gray-500 line-through"
+                          ? "text-gray-500 line-through decoration-gray-600"
                           : isCurrent
-                          ? "text-amber-200 font-medium"
+                          ? "text-gray-300"
                           : "text-gray-400"
                       }`}
                     >
@@ -211,40 +156,44 @@ export function PlanningPanel({ planningState, isVisible, onClose }: Props) {
                   </motion.div>
                 );
               })}
-            </div>
-            
-            {/* Progress bar */}
-            <div className="mt-3 h-1 bg-white/[0.06] rounded-full overflow-hidden">
-              <motion.div
-                className="h-full bg-gradient-to-r from-amber-400 to-orange-400"
-                initial={{ width: 0 }}
-                animate={{
-                  width: `${((planningState.planStepIndex) / planningState.plan.length) * 100}%`,
-                }}
-                transition={{ duration: 0.5, ease: "easeOut" }}
-              />
-            </div>
-          </motion.div>
-        )}
 
-        {/* Progress indicator for detecting */}
-        {isLoading && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="mt-2"
-          >
-            <div className="h-[2px] bg-white/[0.06] rounded-full overflow-hidden">
-              <motion.div
-                className="h-full bg-gradient-to-r from-amber-400/80 to-orange-400/80"
-                animate={{ x: ["-100%", "100%"] }}
-                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                style={{ width: "50%" }}
-              />
+              {/* Generating indicator (like Cursor) */}
+              {isGenerating && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="flex items-center gap-2 py-0.5 mt-1"
+                >
+                  <div className="w-4 h-4 flex items-center justify-center">
+                    <Loader2 className="w-3.5 h-3.5 text-gray-500 animate-spin" />
+                  </div>
+                  <span className="text-sm text-gray-500">
+                    {planningState.status === "detecting_unknown" && "Analyzing request..."}
+                    {planningState.status === "web_search_complete" && "Searching web..."}
+                    {planningState.status === "web_search_skipped" && "Creating plan..."}
+                    {!planningState.status && "Generating."}
+                  </span>
+                </motion.div>
+              )}
+
+              {/* Unknown entities (compact) */}
+              {planningState.unknownEntities.length > 0 && (
+                <div className="flex items-center gap-1.5 py-0.5 flex-wrap">
+                  <span className="text-xs text-gray-600">Unknown:</span>
+                  {planningState.unknownEntities.map((entity, i) => (
+                    <span
+                      key={i}
+                      className="text-xs text-amber-400/80 bg-amber-400/10 px-1.5 py-0.5 rounded"
+                    >
+                      {entity}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           </motion.div>
         )}
-      </motion.div>
-    </AnimatePresence>
+      </AnimatePresence>
+    </motion.div>
   );
 }
