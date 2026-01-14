@@ -593,9 +593,7 @@ export default function Home() {
                 <img src="/images/gemini-logo.png" alt="Gemini" className="w-full h-full object-contain" />
               </div>
               <h2 className="text-3xl font-bold text-white mb-3 tracking-tight">키오스크 에이전트</h2>
-              <p className="text-gray-400 max-w-sm leading-relaxed mb-10">
-                지시 사항을 입력하면 에이전트가 키오스크를 제어하여 주문을 도와드립니다.
-              </p>
+              <p className="text-gray-400 mb-10">에이전트가 키오스크를 제어하여 주문을 도와드립니다.</p>
               <div className="flex flex-wrap gap-2.5 justify-center">
                 {quickActions.map((a) => (
                   <button
@@ -607,13 +605,10 @@ export default function Home() {
                   </button>
                 ))}
               </div>
-              {/* Time-based Greeting - subtle footer style */}
-              <div className="mt-12 flex items-center gap-2 text-[13px] text-gray-500">
-                <span>{greeting.emoji}</span>
-                <span>{greeting.text},</span>
-                <span className="text-gray-400">KDB</span>
-                <span>님</span>
-              </div>
+              {/* Time-based Greeting */}
+              <p className="mt-12 text-[13px] text-gray-500">
+                {greeting.emoji} {greeting.text}. 무엇을 주문해 드릴까요?
+              </p>
             </div>
           )}
 
