@@ -30,6 +30,7 @@
 ### ✨ Features
 
 - **VLA Paradigm**: Vision → Language → Action 워크플로우
+- **[AG-UI Protocol](https://github.com/ag-ui-protocol/ag-ui)**: 표준화된 에이전트-UI 통신 프로토콜
 - **Multi-Framework Support**: LangGraph 기본, CrewAI/Google ADK 확장 가능
 - **Human-in-the-Loop**: 주관적 선택이 필요할 때 사용자에게 질문
 - **Voice Interface**: TTS (CosyVoice3) / STT (Google Cloud) 지원
@@ -104,6 +105,69 @@ flowchart LR
 |----------|------|------|
 | **STT** | Google Cloud Speech-to-Text | 실시간 음성 인식 |
 | **TTS** | CosyVoice3 (MLX) | Zero-shot 음성 합성, 커스텀 캐릭터 음성 |
+
+### 📡 AG-UI Protocol
+
+[AG-UI](https://github.com/ag-ui-protocol/ag-ui)는 AI 에이전트와 프론트엔드 간의 표준화된 통신 프로토콜입니다. SSE (Server-Sent Events) 기반으로 실시간 스트리밍을 지원합니다.
+
+```mermaid
+sequenceDiagram
+    participant UI as Frontend (Next.js)
+    participant API as Backend (FastAPI)
+    participant Agent as KioskAgent
+    
+    UI->>API: POST /agent/start
+    API->>Agent: Start Workflow
+    API-->>UI: SSE: RUN_STARTED
+    
+    loop VLA Loop
+        Agent->>Agent: Screen → VLM → Action
+        API-->>UI: SSE: STATE_SNAPSHOT
+    end
+    
+    alt INTERRUPT (HITL)
+        API-->>UI: SSE: CUSTOM (waiting_human)
+        UI->>API: POST /agent/respond
+        API->>Agent: Resume with user input
+    end
+    
+    API-->>UI: SSE: RUN_FINISHED
+```
+
+#### AG-UI Event Types
+
+| Event Type | 설명 | Payload |
+|------------|------|---------|
+| `RUN_STARTED` | 에이전트 실행 시작 | `threadId`, `runId`, `timestamp` |
+| `STATE_SNAPSHOT` | 상태 업데이트 | `snapshot` (thought, action, iteration 등) |
+| `CUSTOM` | 커스텀 이벤트 | `name`, `value` |
+| `RUN_ERROR` | 에러 발생 | `message`, `code`, `timestamp` |
+| `RUN_FINISHED` | 실행 완료 | `result`, `threadId`, `runId` |
+
+#### Custom Events
+
+| Name | 설명 | Value |
+|------|------|-------|
+| `waiting_human` | HITL 대기 상태 | `thread_id`, `character` |
+| `tts_generated` | TTS 오디오 생성 완료 | `audio_path`, `final_thought` |
+
+#### SSE 스트림 예시
+
+```bash
+# POST /agent/start 응답 (SSE)
+
+event: data
+data: {"type": "RUN_STARTED", "threadId": "abc-123", "runId": "xyz-456", "timestamp": 1705123456789}
+
+event: data
+data: {"type": "STATE_SNAPSHOT", "snapshot": {"status": "running", "iteration": 1, "thought": "메뉴 버튼을 찾고 있습니다...", "action": "CLICK"}}
+
+event: data
+data: {"type": "CUSTOM", "name": "waiting_human", "value": {"thread_id": "abc-123", "question": "사이즈를 선택해주세요"}}
+
+event: data
+data: {"type": "RUN_FINISHED", "threadId": "abc-123", "result": {"status": "waiting_human"}}
+```
 
 ---
 
