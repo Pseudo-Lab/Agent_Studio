@@ -387,10 +387,7 @@ export default function Home() {
         });
         setShowPlanningPanel(true);
         
-        // Hide planning panel after completion (with delay)
-        if (value.status === "planning_complete") {
-          setTimeout(() => setShowPlanningPanel(false), 3000);
-        }
+        // Keep planning panel visible (user can close manually)
       }
     }
   }, [addMessage, addThinkingStep, finalizeThinking, activeInterruptId]);
@@ -951,6 +948,7 @@ export default function Home() {
           <PlanningPanel 
             planningState={planningState} 
             isVisible={showPlanningPanel && enablePlanning} 
+            onClose={() => setShowPlanningPanel(false)}
           />
 
           <div ref={chatEndRef} />

@@ -2,12 +2,13 @@
 
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, ListChecks, Loader2, Globe, SlidersHorizontal } from "lucide-react";
+import { Search, ListChecks, Loader2, Globe, SlidersHorizontal, X } from "lucide-react";
 import type { PlanningState } from "../types";
 
 type Props = {
   planningState: PlanningState | null;
   isVisible: boolean;
+  onClose?: () => void;
 };
 
 const statusConfig = {
@@ -33,13 +34,18 @@ const statusConfig = {
   },
 };
 
-export function PlanningPanel({ planningState, isVisible }: Props) {
+export function PlanningPanel({ planningState, isVisible, onClose }: Props) {
   if (!isVisible || !planningState) return null;
 
-  const config = statusConfig[planningState.status] || statusConfig.detecting_unknown;
+  type StatusKey = keyof typeof statusConfig;
+  const statusKey: StatusKey =
+    planningState.status && planningState.status in statusConfig
+      ? (planningState.status as StatusKey)
+      : "detecting_unknown";
+  const config = statusConfig[statusKey];
   const IconComponent = config.icon;
-  const isLoading = planningState.status === "detecting_unknown";
-  const isMuted = planningState.status === "web_search_skipped";
+  const isLoading = statusKey === "detecting_unknown";
+  const isMuted = statusKey === "web_search_skipped";
 
   const accent = {
     icon: isMuted ? "text-gray-400" : "text-amber-300",
@@ -86,6 +92,16 @@ export function PlanningPanel({ planningState, isVisible }: Props) {
               <div className="text-[11px] text-gray-500 leading-relaxed truncate">{config.description}</div>
             </div>
           </div>
+          {onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-8 h-8 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] hover:border-white/[0.10] transition-colors flex items-center justify-center text-gray-500 hover:text-gray-300 flex-shrink-0"
+              title="닫기"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
         </div>
 
         {/* Unknown Entities */}
