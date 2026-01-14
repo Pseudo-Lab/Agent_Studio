@@ -17,6 +17,10 @@ pillow>=10.0.0
 
 # Agent Framework
 langgraph>=0.2.0
+langchain-community>=0.2.0
+
+# Planning Mode (optional - web search)
+tavily-python>=0.3.0
 
 # Voice (optional)
 mlx-audio>=0.1.0; platform_system == "Darwin"

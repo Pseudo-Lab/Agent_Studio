@@ -44,10 +44,15 @@ def sse_encode(data: Dict[str, Any]) -> bytes:
 
 
 def snapshot_from_state(state: Dict[str, Any]) -> Dict[str, Any]:
-    """Convert agent state to snapshot format."""
+    """Convert agent state to snapshot format including planning fields."""
     payload = state.get("payload") or {}
     if not isinstance(payload, dict):
         payload = {}
+    
+    # Planning fields
+    plan = state.get("plan", [])
+    plan_step_index = state.get("plan_step_index", 0)
+    planning_complete = state.get("planning_complete", True)
     
     interrupt = payload.get("interrupt")
     action = payload.get("action")
@@ -69,6 +74,10 @@ def snapshot_from_state(state: Dict[str, Any]) -> Dict[str, Any]:
         "interrupt": interrupt,
         "progress": state.get("progress"),
         "difference": state.get("difference"),
+        # Planning fields
+        "plan": plan if plan else None,
+        "plan_step_index": plan_step_index if plan else None,
+        "planning_complete": planning_complete,
     }
 
 
@@ -115,7 +124,7 @@ class AgentStreamer:
         *,
         executor: ThreadPoolExecutor,
         sessions: SessionStore,
-        get_agent: Callable[[Optional[str]], Any],
+        get_agent: Callable[[Optional[str], bool], Any],
     ):
         self._executor = executor
         self._sessions = sessions
@@ -126,7 +135,8 @@ class AgentStreamer:
         thread_id = req.thread_id or str(uuid.uuid4())
         run_id = str(uuid.uuid4())
         
-        logger.info(f"Starting agent: thread={thread_id}, model={req.model or 'default'}")
+        enable_planning = getattr(req, 'enable_planning', False)
+        logger.info(f"Starting agent: thread={thread_id}, model={req.model or 'default'}, planning={enable_planning}")
 
         # Assign character for this session
         clear_session_character(thread_id)  # 새 세션이므로 기존 할당 초기화
@@ -141,7 +151,7 @@ class AgentStreamer:
         character_ref_audio = get_character_ref_audio_path(character)
         character_ref_text = character.ref_text
 
-        agent = self._get_agent(req.model)
+        agent = self._get_agent(req.model, enable_planning)
         graph, initial_state = agent.prepare_workflow(req.instruction)
 
         # Initialize session
@@ -154,6 +164,7 @@ class AgentStreamer:
                 "instruction": req.instruction,
                 "model": req.model or "gemini-flash",
                 "character_id": character.id,
+                "enable_planning": enable_planning,
             },
         )
 
@@ -262,13 +273,14 @@ class AgentStreamer:
         self._executor.submit(run_graph)
 
         async def stream():
-            # RUN_STARTED (AG-UI) with character info
+            # RUN_STARTED (AG-UI) with character info and planning status
             yield sse_encode({
                 "type": "RUN_STARTED",
                 "threadId": thread_id,
                 "runId": run_id,
                 "timestamp": int(time.time() * 1000),
                 "chef": character_info,  # Frontend expects 'chef' key
+                "planningEnabled": enable_planning,
             })
             await asyncio.sleep(0)
 

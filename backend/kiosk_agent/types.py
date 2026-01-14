@@ -48,6 +48,14 @@ class AgentState(TypedDict, total=False):
     backtrack_target_index: Optional[int]  # Index in history to return to
     last_iteration_id: int  # The 'parent' iteration for the current step
     current_screen_id: Optional[str]
+    
+    # Planning Mode fields
+    plan: List[str]  # Generated plan steps
+    plan_step_index: int  # Current step being executed (0-based)
+    unknown_entities: List[str]  # Detected unknown concepts/entities
+    search_context: str  # Web search results for context enrichment
+    planning_complete: bool  # Whether planning phase is done
+    original_instruction: str  # Original user instruction before enrichment
 
 
 @dataclass

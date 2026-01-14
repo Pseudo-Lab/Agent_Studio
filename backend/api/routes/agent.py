@@ -31,7 +31,7 @@ _agent: Optional[Any] = None
 _current_model: Optional[str] = None
 
 
-def get_agent(model_id: Optional[str] = None):
+def get_agent(model_id: Optional[str] = None, enable_planning: bool = False):
     """Get or create agent instance with config from environment."""
     global _agent, _current_model
     
@@ -59,11 +59,19 @@ def get_agent(model_id: Optional[str] = None):
         if config.model.provider == "chatgpt" and not config.model.openai_api_key:
             raise ValueError("OPENAI_API_KEY 환경변수가 필요합니다.")
         
-        # Create agent
+        # Create agent (enable_planning will be set per-request)
         enable_tts = os.getenv("AGENT_TTS_ENABLED", "1").lower() in {"1", "true", "yes", "on"}
-        _agent = Agent(config, enable_tts=enable_tts)
+        _agent = Agent(config, enable_tts=enable_tts, enable_planning=False)
         _current_model = requested
         logger.info(f"Agent initialized: provider={config.model.provider}, model={target_model}")
+    
+    # Update enable_planning for this request (dynamically toggle)
+    if _agent is not None:
+        if _agent.enable_planning != enable_planning:
+            _agent.enable_planning = enable_planning
+            if enable_planning and not _agent._planning_initialized:
+                _agent._init_planning_tools()
+            logger.info(f"Planning Mode: {'enabled' if enable_planning else 'disabled'}")
     
     return _agent
 

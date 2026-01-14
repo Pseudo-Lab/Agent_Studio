@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowUp, CheckCircle2, ChevronUp, Loader2, Mic, Square, X } from "lucide-react";
+import { ArrowUp, Brain, CheckCircle2, ChevronUp, Loader2, Mic, Square, X } from "lucide-react";
 
 type Props = {
   inputValue: string;
@@ -21,6 +21,10 @@ type Props = {
   setSelectedModel: (m: string) => void;
   showModelSelector: boolean;
   setShowModelSelector: (v: boolean) => void;
+
+  // Planning mode
+  enablePlanning: boolean;
+  setEnablePlanning: (v: boolean) => void;
 
   // Submit / stop
   onSubmit: (e: React.FormEvent) => void;
@@ -86,6 +90,8 @@ export function ChatInputBar({
   setSelectedModel,
   showModelSelector,
   setShowModelSelector,
+  enablePlanning,
+  setEnablePlanning,
   onSubmit,
   onStop,
   disableSubmit,
@@ -202,8 +208,25 @@ export function ChatInputBar({
             disabled={isRunning && !requiresHumanInput}
           />
 
-          {/* Model Selector - Inside Input */}
-          <div className="absolute right-3">
+          {/* Planning Toggle & Model Selector - Inside Input */}
+          <div className="absolute right-3 flex items-center gap-1">
+            {/* Planning Mode Toggle */}
+            <button
+              type="button"
+              onClick={() => setEnablePlanning(!enablePlanning)}
+              disabled={isRunning}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-bold transition-all uppercase tracking-wider ${
+                enablePlanning
+                  ? "bg-purple-500/20 text-purple-400 border border-purple-500/30"
+                  : "text-gray-500 hover:text-gray-300 hover:bg-white/[0.05]"
+              } disabled:opacity-50 disabled:cursor-not-allowed`}
+              title={enablePlanning ? "Planning Mode ON - 웹 검색 및 태스크 분해 활성화" : "Planning Mode OFF"}
+            >
+              <Brain className={`w-3.5 h-3.5 ${enablePlanning ? "text-purple-400" : ""}`} />
+              <span className="hidden sm:inline">Plan</span>
+            </button>
+
+            {/* Model Selector */}
             <div className="relative">
               <button
                 type="button"

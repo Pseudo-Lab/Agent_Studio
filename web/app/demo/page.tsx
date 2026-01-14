@@ -71,6 +71,9 @@ export default function Home() {
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [selectedModel, setSelectedModel] = useState<string>("gemini-flash");
   const [showModelSelector, setShowModelSelector] = useState(false);
+  
+  // Planning Mode
+  const [enablePlanning, setEnablePlanning] = useState(false);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -413,7 +416,8 @@ export default function Home() {
     await startStream('/api/agent/start', { 
       instruction: userInput, 
       thread_id: newThreadId,
-      model: selectedModel 
+      model: selectedModel,
+      enable_planning: enablePlanning,
     });
   };
 
@@ -809,6 +813,7 @@ export default function Home() {
                                       instruction: prompt,
                                       thread_id: newThreadId,
                                       model: selectedModel,
+                                      enable_planning: enablePlanning,
                                     });
                                   }}
                                   disabled={isRunning}
@@ -929,6 +934,8 @@ export default function Home() {
           setSelectedModel={setSelectedModel}
           showModelSelector={showModelSelector}
           setShowModelSelector={setShowModelSelector}
+          enablePlanning={enablePlanning}
+          setEnablePlanning={setEnablePlanning}
           onSubmit={handleSubmit}
           onStop={handleStop}
           disableSubmit={!isRunning && !requiresHumanInput && !inputValue.trim()}

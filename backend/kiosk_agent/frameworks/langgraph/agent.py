@@ -17,11 +17,12 @@ from ...utils.common import build_result
 from ..base import BaseAgent
 from .nodes import NodeMixin
 from .graph import GraphMixin
+from .planning import PlanningMixin
 
 logger = get_logger(__name__)
 
 
-class KioskAgent(NodeMixin, GraphMixin, BaseAgent):
+class KioskAgent(PlanningMixin, NodeMixin, GraphMixin, BaseAgent):
     """
     Vision-Language-Action agent using LangGraph for orchestration.
     
@@ -31,7 +32,12 @@ class KioskAgent(NodeMixin, GraphMixin, BaseAgent):
     3. Action: Execute ADB command on device
     4. Loop: Repeat until task complete or human input needed
     
+    When Planning Mode is enabled:
+    0. Planning: Detect unknown -> Web search -> Generate plan
+    1-4. Same VLA workflow with enriched context
+    
     Inherits:
+    - PlanningMixin: Planning nodes (detect, search, plan)
     - NodeMixin: Node implementations (vlm, execute, router, human, analyze)
     - GraphMixin: Graph building and routing logic
     - BaseAgent: Base agent interface
@@ -42,6 +48,7 @@ class KioskAgent(NodeMixin, GraphMixin, BaseAgent):
         config: AgentConfig, 
         dry_run: bool = False,
         enable_tts: bool = True,
+        enable_planning: bool = False,
     ):
         super().__init__(config)
         
@@ -54,6 +61,7 @@ class KioskAgent(NodeMixin, GraphMixin, BaseAgent):
         self.recursion_limit = config.recursion_limit
         self.tts_keep_last_n = config.tts_keep_last_n
         self.enable_tts = enable_tts
+        self.enable_planning = enable_planning or config.planning.enabled
         self.graph: Optional[CompiledStateGraph] = None
         
         # Initialize model client
@@ -64,6 +72,11 @@ class KioskAgent(NodeMixin, GraphMixin, BaseAgent):
         
         # Initialize TTS
         self._init_tts()
+        
+        # Initialize Planning tools (if enabled)
+        if self.enable_planning:
+            self._init_planning_tools()
+            logger.info("Planning Mode enabled")
 
     def _init_model_client(self, config: AgentConfig) -> None:
         """Initialize VLM model client based on provider."""
@@ -129,6 +142,13 @@ class KioskAgent(NodeMixin, GraphMixin, BaseAgent):
             "last_adb_commands": [],
             "last_iteration_id": -1,
             "current_screen_id": None,
+            # Planning Mode fields
+            "plan": [],
+            "plan_step_index": 0,
+            "unknown_entities": [],
+            "search_context": "",
+            "planning_complete": not self.enable_planning,
+            "original_instruction": instruction,
         }
         screen_id = compute_screen_id(self.current_screen_path)
         initial_state["current_screen_id"] = screen_id

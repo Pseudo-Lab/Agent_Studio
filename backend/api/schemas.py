@@ -13,6 +13,7 @@ class StartRequest(BaseModel):
     instruction: str
     thread_id: Optional[str] = None
     model: Optional[str] = None  # 'gemini-flash', 'gemini-3-preview'
+    enable_planning: bool = False  # Enable Planning Mode (task decomposition + web search)
 
 
 class RespondRequest(BaseModel):
@@ -35,6 +36,10 @@ class SnapshotResponse(BaseModel):
     interrupt: Optional[Dict[str, Any]] = None
     progress: Optional[bool] = None
     difference: Optional[float] = None
+    # Planning Mode fields
+    plan: Optional[List[str]] = None
+    plan_step_index: Optional[int] = None
+    planning_complete: Optional[bool] = None
 
 
 class HealthResponse(BaseModel):

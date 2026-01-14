@@ -23,30 +23,63 @@ class GraphMixin:
     - router: Route decision
     - human: Human-in-the-loop
     - analyze: Situation analysis
+    
+    When Planning Mode is enabled, adds:
+    - detect_unknown: Detect unknown entities
+    - web_search: Search for context (Tavily)
+    - plan: Generate step-by-step plan
     """
 
     def _build_graph(self) -> CompiledStateGraph:
         """
         Build LangGraph workflow.
         
-        Graph structure:
+        Graph structure (Planning disabled):
         
         vlm -> execute -> router -+-> loop -> vlm
                                   +-> analyze -> loop/end
                                   +-> human -> resume/abort
                                   +-> end
+        
+        Graph structure (Planning enabled):
+        
+        detect_unknown -> [search] -> plan -> vlm -> execute -> router -> ...
         """
         builder = StateGraph(AgentState)
         
-        # Add nodes
+        # Planning Phase nodes (conditional)
+        if getattr(self, 'enable_planning', False):
+            logger.info("Building graph with Planning Mode enabled")
+            builder.add_node("detect_unknown", self._detect_unknown_node)
+            builder.add_node("web_search", self._web_search_node)
+            builder.add_node("plan", self._plan_node)
+        
+        # VLA Phase nodes
         builder.add_node("vlm", self._vlm_node)
         builder.add_node("execute", self._execute_node)
         builder.add_node("router", self._router_node)
         builder.add_node("human", self._human_node)
         builder.add_node("analyze", self._analyze_node)
         
-        # Set entry point and edges
-        builder.set_entry_point("vlm")
+        # Set entry point based on planning mode
+        if getattr(self, 'enable_planning', False):
+            builder.set_entry_point("detect_unknown")
+            
+            # Planning edges
+            builder.add_conditional_edges(
+                "detect_unknown",
+                self._should_search,
+                {
+                    "search": "web_search",
+                    "plan": "plan",
+                },
+            )
+            builder.add_edge("web_search", "plan")
+            builder.add_edge("plan", "vlm")
+        else:
+            builder.set_entry_point("vlm")
+        
+        # VLA edges
         builder.add_edge("vlm", "execute")
         builder.add_edge("execute", "router")
         

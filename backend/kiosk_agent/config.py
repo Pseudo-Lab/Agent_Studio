@@ -9,29 +9,13 @@ from typing import Literal, Optional
 
 from .prompts.system import VLM_GEMINI_SYSTEM_PROMPT
 
-# Project root directory (backend's parent)
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-
-
-def _resolve_path(env_var: str, default_subpath: str) -> Path:
-    """Resolve path from env (relative to project root) or use default."""
-    env_dir = os.getenv(env_var)
-    if env_dir:
-        path = Path(env_dir)
-        if not path.is_absolute():
-            path = PROJECT_ROOT / path
-        return path
-    return PROJECT_ROOT / default_subpath
-
 
 def _get_screenshots_dir() -> Path:
     """Get screenshots directory from env or default."""
-    return _resolve_path("SCREENSHOTS_DIR", "screenshots")
-
-
-def _get_tts_output_dir() -> str:
-    """Get TTS output directory from env or default."""
-    return str(_resolve_path("TTS_OUTPUT_DIR", "screenshots/tts_output"))
+    env_dir = os.getenv("SCREENSHOTS_DIR")
+    if env_dir:
+        return Path(env_dir)
+    return Path(__file__).resolve().parents[2] / "screenshots"
 
 
 @dataclass
@@ -81,7 +65,28 @@ class ADBConfig:
     default_swipe_duration_ms: int = field(default_factory=lambda: int(os.getenv("SWIPE_MS", "300")))
     steps: int = 1
     screenshot_abs_path: str = field(
-        default_factory=lambda: str(_resolve_path("SCREENSHOTS_DIR", "screenshots"))
+        default_factory=lambda: os.getenv("SCREENSHOTS_DIR") or str(Path(__file__).resolve().parents[2] / "screenshots")
+    )
+
+
+@dataclass
+class PlanningConfig:
+    """Configuration for Planning Mode (task decomposition and web search)."""
+    
+    enabled: bool = field(
+        default_factory=lambda: os.getenv("AGENT_PLANNING_ENABLED", "0").lower() in {"1", "true", "yes", "on"}
+    )
+    web_search_provider: Literal["tavily", "duckduckgo"] = field(
+        default_factory=lambda: os.getenv("PLANNING_SEARCH_PROVIDER", "tavily")
+    )
+    tavily_api_key: str = field(
+        default_factory=lambda: os.getenv("TAVILY_API_KEY", "")
+    )
+    max_search_results: int = field(
+        default_factory=lambda: int(os.getenv("PLANNING_MAX_SEARCH_RESULTS", "5"))
+    )
+    max_plan_steps: int = field(
+        default_factory=lambda: int(os.getenv("PLANNING_MAX_STEPS", "10"))
     )
 
 
@@ -92,6 +97,7 @@ class AgentConfig:
     screenshot: ScreenshotConfig = field(default_factory=ScreenshotConfig)
     model: ModelConfig = field(default_factory=ModelConfig)
     adb: ADBConfig = field(default_factory=ADBConfig)
+    planning: PlanningConfig = field(default_factory=PlanningConfig)
     
     # Runtime parameters (can be overridden via env)
     max_iterations: int = field(
@@ -112,4 +118,6 @@ class AgentConfig:
     tts_thought_max_chars: int = field(
         default_factory=lambda: int(os.getenv("AGENT_TTS_THOUGHT_MAX_CHARS", "320"))
     )
-    tts_output_dir: str = field(default_factory=_get_tts_output_dir)
+    tts_output_dir: str = field(
+        default_factory=lambda: os.getenv("TTS_OUTPUT_DIR") or str(Path(__file__).resolve().parents[2] / "screenshots" / "tts_output")
+    )
