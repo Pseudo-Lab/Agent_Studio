@@ -56,7 +56,8 @@ next-env.d.ts
 !web/package.json
 !web/package-lock.json
 !web/tsconfig.json
-!backend/config/*.yaml
+!backend/config/*.yaml.example
+backend/config/characters.yaml
 
 # Google Cloud Credentials
 gen-lang-client-*.json

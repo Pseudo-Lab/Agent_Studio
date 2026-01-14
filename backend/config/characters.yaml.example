@@ -1,0 +1,44 @@
+# Character Configuration for Kiosk Agent TTS
+# 캐릭터별 음성 및 개성 설정
+#
+# 사용법:
+# 1. 이 파일을 characters.yaml로 복사하세요
+# 2. 각 캐릭터의 정보를 실제 값으로 수정하세요
+# 3. ref_audio 파일을 프로젝트 루트에 배치하세요
+
+characters:
+  - id: character_1
+    name: 캐릭터1
+    nickname: 캐릭터1 별명
+    ref_audio: character1_reference.wav  # TTS 레퍼런스 오디오 파일
+    ref_text: >-
+      레퍼런스 오디오의 텍스트 내용을 여기에 입력하세요.
+      TTS 모델이 음성 스타일을 학습하는 데 사용됩니다.
+    image_path: /images/character1.jpg
+    completion_messages:
+      - 주문이 완료되었습니다.
+      - 준비되었습니다.
+      - 여기 있습니다.
+      - 완료했습니다.
+    quit_messages:
+      - 다음에 또 오세요.
+      - 좋은 하루 되세요.
+      - 감사합니다.
+
+  - id: character_2
+    name: 캐릭터2
+    nickname: 캐릭터2 별명
+    ref_audio: character2_reference.wav
+    ref_text: >-
+      두 번째 캐릭터의 레퍼런스 오디오 텍스트입니다.
+      각 캐릭터마다 고유한 음성 스타일을 가질 수 있습니다.
+    image_path: /images/character2.jpg
+    completion_messages:
+      - 완성입니다!
+      - 맛있게 드세요.
+      - 준비 완료!
+      - 나왔습니다.
+    quit_messages:
+      - 또 놀러오세요.
+      - 다음에 봐요!
+      - 안녕히 가세요.
