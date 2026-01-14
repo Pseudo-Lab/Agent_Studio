@@ -33,6 +33,7 @@
 - **[AG-UI Protocol](https://github.com/ag-ui-protocol/ag-ui)**: 표준화된 에이전트-UI 통신 프로토콜
 - **Multi-Framework Support**: LangGraph 기본, CrewAI/Google ADK 확장 가능
 - **Human-in-the-Loop**: 주관적 선택이 필요할 때 사용자에게 질문
+- **Planning Mode**: 복잡한 요청을 단계로 분해하고 To-do 형태로 진행 상황 표시
 - **Voice Interface**: TTS (CosyVoice3) / STT (Google Cloud) 지원
 - **Real-time Dashboard**: 에이전트 상태 실시간 모니터링
 
@@ -150,6 +151,10 @@ sequenceDiagram
 |------|------|-------|
 | `waiting_human` | HITL 대기 상태 | `thread_id`, `character` |
 | `tts_generated` | TTS 오디오 생성 완료 | `audio_path`, `final_thought` |
+| `planning_update` | Planning 상태 업데이트 | `status`, `unknown_entities`, `search_context`, `plan` |
+| `plan_step_update` | Planning 단계 진행 | `plan`, `plan_step_index`, `total_steps`, `current_step`, `completed_steps` |
+
+> Planning Mode에서는 `STATE_SNAPSHOT`에 `plan`, `plan_step_index`, `planning_complete`, `step_completed` 필드가 포함됩니다.
 
 #### SSE 스트림 예시
 
@@ -174,8 +179,17 @@ data: {"type": "RUN_FINISHED", "threadId": "abc-123", "result": {"status": "wait
 ## 📁 Project Structure
 
 ```
-kiosk-agent/
+Agent_Studio/
 ├── backend/                      # Python 백엔드
+│   ├── api/                      # FastAPI 서버
+│   │   ├── main.py               # 앱 엔트리포인트
+│   │   ├── routes/               # API 라우트
+│   │   │   ├── agent.py          # /agent/* 엔드포인트
+│   │   │   ├── voice.py          # /stt/*, /tts/* 엔드포인트
+│   │   │   └── health.py         # /health 엔드포인트
+│   │   ├── schemas.py            # 요청/응답 스키마
+│   │   ├── session.py            # HITL 세션 관리
+│   │   └── streamer.py           # SSE 스트리밍
 │   ├── kiosk_agent/              # 코어 에이전트 라이브러리
 │   │   ├── core/                 # ADB 제어, 스크린샷 캡처
 │   │   │   ├── control.py        # ADB 명령 실행 (tap, swipe, input)
@@ -188,12 +202,10 @@ kiosk-agent/
 │   │   │   └── local.py          # Local vLLM (AgentCPM 등)
 │   │   ├── frameworks/           # 에이전트 프레임워크
 │   │   │   ├── langgraph/        # LangGraph 구현 (기본)
-│   │   │   │   ├── agent.py      # KioskAgent 메인 클래스
-│   │   │   │   ├── graph.py      # StateGraph 정의
-│   │   │   │   ├── nodes.py      # 노드 구현 (VLM, Execute, Human)
-│   │   │   │   └── prompts.py    # 프롬프트 템플릿
 │   │   │   ├── google-adk/       # Google ADK (예정)
-│   │   │   └── crewai/           # CrewAI (예정)
+│   │   │   ├── crewai/           # CrewAI (예정)
+│   │   │   ├── agnet-framework/  # Agent Framework 샘플
+│   │   │   └── openai-agent/     # OpenAI Agent 샘플
 │   │   ├── prompts/              # 시스템 프롬프트
 │   │   │   └── system.py         # VLM 시스템 프롬프트
 │   │   ├── voice/                # 음성 모듈
@@ -201,33 +213,41 @@ kiosk-agent/
 │   │   │   └── tts.py            # CosyVoice3 TTS
 │   │   ├── config.py             # 설정 클래스 정의
 │   │   └── characters.py         # 캐릭터 로더
-│   ├── api/                      # FastAPI 서버
-│   │   ├── main.py               # 앱 엔트리포인트
-│   │   ├── routes/               # API 라우트
-│   │   │   ├── agent.py          # /agent/* 엔드포인트
-│   │   │   ├── voice.py          # /stt/*, /tts/* 엔드포인트
-│   │   │   └── health.py         # /health 엔드포인트
-│   │   ├── session.py            # HITL 세션 관리
-│   │   └── streamer.py           # SSE 스트리밍
 │   ├── config/                   # 설정 파일
-│   │   └── characters.yaml.example  # 캐릭터 설정 템플릿
-│   └── requirements.txt
+│   │   └── characters.yaml.example
+│   ├── output/                   # 런타임 출력 (gitignore)
+│   ├── requirements.txt
+│   └── pyproject.toml
 │
 ├── web/                          # Next.js 프론트엔드
 │   ├── app/                      # App Router
 │   │   ├── demo/                 # 메인 데모 페이지
+│   │   │   ├── components/       # ChatInputBar, ThinkingBlock, PlanningPanel
 │   │   │   ├── page.tsx          # 데모 UI
-│   │   │   └── components/       # ChatInputBar, ResultAudioButton
-│   │   └── member/               # 팀원 소개 페이지
-│   └── components/               # 공통 React 컴포넌트
+│   │   │   └── types.ts          # 데모 타입
+│   │   ├── member/               # 팀원 소개 페이지
+│   │   ├── layout.tsx
+│   │   ├── page.tsx
+│   │   ├── globals.css
+│   │   └── icon.png
+│   ├── components/               # 공통 React 컴포넌트
+│   ├── data/                     # 데모 이미지/자산
+│   ├── public/                   # 정적 리소스
+│   └── package.json
 │
 ├── output/                       # 런타임 출력 (gitignore)
 │   └── data/
 │       ├── screenshot/           # 캡처된 스크린샷
 │       └── tts/                  # TTS 오디오 파일
 │
+├── screenshots/                  # 레거시 출력 디렉토리
 ├── run.sh                        # 통합 실행 스크립트
+├── run_agent.py                  # 에이전트 단독 실행
+├── run_web.sh                    # 프론트엔드 실행
+├── run_ui.sh                     # UI 실행
+├── stop_web.sh                   # 프론트엔드 종료
 ├── .env.example                  # 환경변수 예시
+├── ARCHITECTURE.md               # 아키텍처 문서
 └── RELEASE_NOTES.md              # 릴리즈 노트
 ```
 
@@ -409,6 +429,19 @@ adb devices
 - **Frontend**: http://localhost:3000
 - **Backend API**: http://localhost:8080
 - **API Docs**: http://localhost:8080/docs
+
+### Planning Mode (옵션)
+
+UI에서는 입력창의 **Planning Mode** 토글로 활성화할 수 있습니다. API 호출 시에는 `enable_planning`을 전달합니다.
+
+```bash
+curl -X POST http://localhost:8080/agent/start \
+  -H "Content-Type: application/json" \
+  -d '{
+    "instruction": "아메리카노 한 잔 주문해줘",
+    "enable_planning": true
+  }'
+```
 
 ---
 
@@ -635,6 +668,7 @@ lsof -i :3000 | grep LISTEN | awk '{print $2}' | xargs kill -9
 ### ✅ v1.0.0 (현재)
 
 - LangGraph 기반 VLA 에이전트
+- Planning Mode (태스크 분해 및 To-do 진행 표시)
 - TTS/STT 음성 인터페이스
 - Human-in-the-Loop 피드백 시스템
 - Next.js 실시간 대시보드
@@ -649,7 +683,6 @@ lsof -i :3000 | grep LISTEN | awk '{print $2}' | xargs kill -9
 
 ### 🎯 Future Plans
 
-- **Planning Mode**: 복잡한 태스크를 서브태스크로 분해
 - **Context Management**: 장기 메모리 및 대화 컨텍스트 관리
 - **On-device Model**: 경량화 모델 (AgentCPM 등)
 - **Microservice Architecture**: 스케일러블 아키텍처
