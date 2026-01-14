@@ -210,19 +210,19 @@ export function ChatInputBar({
 
           {/* Planning Toggle & Model Selector - Inside Input */}
           <div className="absolute right-3 flex items-center gap-1">
-            {/* Planning Mode Toggle */}
+            {/* Planning Mode Toggle - Cursor Style */}
             <button
               type="button"
               onClick={() => setEnablePlanning(!enablePlanning)}
               disabled={isRunning}
               className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-bold transition-all uppercase tracking-wider ${
                 enablePlanning
-                  ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/25"
+                  ? "bg-amber-400/90 text-amber-950 border border-amber-400/50"
                   : "text-gray-500 hover:text-gray-300 hover:bg-white/[0.05]"
               } disabled:opacity-50 disabled:cursor-not-allowed`}
               title={enablePlanning ? "Planning Mode ON - 웹 검색 및 태스크 분해 활성화" : "Planning Mode OFF"}
             >
-              <SlidersHorizontal className={`w-3.5 h-3.5 ${enablePlanning ? "text-emerald-400" : ""}`} />
+              <SlidersHorizontal className={`w-3.5 h-3.5 ${enablePlanning ? "text-amber-950" : ""}`} />
               <span className="hidden sm:inline">Plan</span>
             </button>
 
@@ -314,8 +314,12 @@ export function ChatInputBar({
           disabled={disableSubmit}
           className={`p-3.5 rounded-[18px] transition-all duration-300 shadow-xl ${
             isRunning && !requiresHumanInput
-              ? "bg-emerald-500 text-white hover:bg-red-500 cursor-pointer shadow-emerald-500/10 hover:shadow-red-500/20"
-              : "bg-emerald-500 text-white hover:bg-emerald-400 disabled:bg-emerald-500/20 disabled:text-white/40 shadow-emerald-500/10"
+              ? enablePlanning
+                ? "bg-amber-400 text-amber-950 hover:bg-red-500 hover:text-white cursor-pointer shadow-amber-400/20 hover:shadow-red-500/20"
+                : "bg-emerald-500 text-white hover:bg-red-500 cursor-pointer shadow-emerald-500/10 hover:shadow-red-500/20"
+              : enablePlanning
+                ? "bg-amber-400 text-amber-950 hover:bg-amber-300 disabled:bg-amber-400/20 disabled:text-amber-950/40 shadow-amber-400/20"
+                : "bg-emerald-500 text-white hover:bg-emerald-400 disabled:bg-emerald-500/20 disabled:text-white/40 shadow-emerald-500/10"
           }`}
           title={isRunning && !requiresHumanInput ? "클릭하여 정지" : "전송"}
         >

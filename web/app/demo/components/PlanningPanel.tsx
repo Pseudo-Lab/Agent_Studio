@@ -15,9 +15,9 @@ const statusConfig = {
     icon: SlidersHorizontal,
     label: "분석 중",
     description: "요청에서 모르는 개념을 찾고 있어요",
-    color: "text-emerald-400",
-    bgColor: "bg-emerald-500/10",
-    borderColor: "border-emerald-500/25",
+    color: "text-amber-400",
+    bgColor: "bg-amber-500/10",
+    borderColor: "border-amber-500/25",
   },
   web_search_complete: {
     icon: Globe,
@@ -96,7 +96,7 @@ export function PlanningPanel({ planningState, isVisible }: Props) {
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: i * 0.1 }}
-                  className="px-2.5 py-1 text-xs font-medium bg-emerald-500/15 text-emerald-300 rounded-lg border border-emerald-500/25"
+                  className="px-2.5 py-1 text-xs font-medium bg-amber-500/15 text-amber-300 rounded-lg border border-amber-500/25"
                 >
                   {entity}
                 </motion.span>
@@ -160,7 +160,7 @@ export function PlanningPanel({ planningState, isVisible }: Props) {
           >
             <div className="h-1 bg-white/5 rounded-full overflow-hidden">
               <motion.div
-                className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400"
+                className="h-full bg-gradient-to-r from-amber-500 to-amber-400"
                 animate={{ x: ["-100%", "100%"] }}
                 transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
                 style={{ width: "50%" }}
