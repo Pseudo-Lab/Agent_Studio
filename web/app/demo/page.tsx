@@ -675,67 +675,132 @@ export default function Home() {
                       transition={{ duration: 0.4, ease: "easeOut" }}
                       className="flex justify-center my-8"
                     >
-                      <div className="relative max-w-md w-full">
-                        {/* Glow effect */}
-                        <div className="absolute -inset-1 bg-gradient-to-r from-orange-500/20 via-red-500/20 to-orange-500/20 rounded-2xl blur-lg opacity-60" />
+                      <div className="relative max-w-sm w-full">
+                        {/* Animated glow effect */}
+                        <motion.div 
+                          animate={{ opacity: [0.4, 0.6, 0.4] }}
+                          transition={{ duration: 3, repeat: Infinity }}
+                          className="absolute -inset-2 bg-gradient-to-r from-emerald-500/20 via-teal-500/15 to-emerald-500/20 rounded-3xl blur-xl" 
+                        />
                         
-                        <div className="relative bg-gradient-to-br from-[#1a1a1f] to-[#15151a] border border-white/10 rounded-2xl p-6 shadow-xl">
-                          {/* Icon */}
-                          <div className="flex justify-center mb-4">
-                            <div className="relative">
-                              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-500/20 to-red-500/20 flex items-center justify-center">
-                                <svg className="w-8 h-8 text-orange-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                                  <rect x="5" y="2" width="14" height="20" rx="2" />
-                                  <line x1="12" y1="18" x2="12" y2="18.01" strokeWidth="2" strokeLinecap="round" />
-                                  <path d="M9 2V1M15 2V1" strokeLinecap="round" />
-                                </svg>
-                              </div>
-                              {/* Disconnected indicator */}
-                              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center border-2 border-[#1a1a1f]">
-                                <svg className="w-3 h-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                                  <path d="M18 6L6 18M6 6l12 12" />
-                                </svg>
-                              </div>
-                            </div>
+                        <div className="relative bg-gradient-to-b from-[#1c1c22] to-[#141418] border border-white/[0.08] rounded-2xl p-8 shadow-2xl overflow-hidden">
+                          {/* Background pattern */}
+                          <div className="absolute inset-0 opacity-[0.03]">
+                            <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
+                          </div>
+                          
+                          {/* Android Robot Icon - Cute style */}
+                          <div className="relative flex justify-center mb-6">
+                            <motion.div
+                              animate={{ y: [0, -4, 0] }}
+                              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                              className="relative"
+                            >
+                              {/* Robot body glow */}
+                              <div className="absolute inset-0 bg-emerald-400/20 rounded-full blur-xl scale-150" />
+                              
+                              {/* Android Robot SVG */}
+                              <svg className="w-20 h-20 relative" viewBox="0 0 96 96" fill="none">
+                                {/* Antennas */}
+                                <motion.line 
+                                  animate={{ rotate: [-8, 8, -8] }}
+                                  transition={{ duration: 1.5, repeat: Infinity }}
+                                  style={{ transformOrigin: '32px 28px' }}
+                                  x1="32" y1="28" x2="24" y2="16" 
+                                  stroke="#3DDC84" strokeWidth="4" strokeLinecap="round"
+                                />
+                                <motion.line 
+                                  animate={{ rotate: [8, -8, 8] }}
+                                  transition={{ duration: 1.5, repeat: Infinity }}
+                                  style={{ transformOrigin: '64px 28px' }}
+                                  x1="64" y1="28" x2="72" y2="16" 
+                                  stroke="#3DDC84" strokeWidth="4" strokeLinecap="round"
+                                />
+                                
+                                {/* Head */}
+                                <path d="M20 44C20 33.5 28.5 28 48 28C67.5 28 76 33.5 76 44V48C76 52 72 56 68 56H28C24 56 20 52 20 48V44Z" fill="#3DDC84"/>
+                                
+                                {/* Eyes */}
+                                <circle cx="36" cy="42" r="4" fill="#1a1a1f"/>
+                                <circle cx="60" cy="42" r="4" fill="#1a1a1f"/>
+                                
+                                {/* Body */}
+                                <rect x="24" y="58" width="48" height="28" rx="4" fill="#3DDC84"/>
+                                
+                                {/* Arms */}
+                                <rect x="12" y="58" width="8" height="20" rx="4" fill="#3DDC84"/>
+                                <rect x="76" y="58" width="8" height="20" rx="4" fill="#3DDC84"/>
+                              </svg>
+                              
+                              {/* Disconnected cable */}
+                              <motion.div 
+                                animate={{ rotate: [0, 5, 0, -5, 0] }}
+                                transition={{ duration: 2, repeat: Infinity }}
+                                className="absolute -bottom-2 -right-2"
+                              >
+                                <div className="w-8 h-8 bg-gradient-to-br from-gray-700 to-gray-800 rounded-full flex items-center justify-center border-2 border-[#1c1c22] shadow-lg">
+                                  <svg className="w-4 h-4 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                                    <path d="M18 6L6 18M6 6l12 12" />
+                                  </svg>
+                                </div>
+                              </motion.div>
+                            </motion.div>
                           </div>
                           
                           {/* Title */}
-                          <h3 className="text-center text-lg font-semibold text-white mb-2">
+                          <h3 className="relative text-center text-lg font-bold text-white mb-2 tracking-tight">
                             {msg.content}
                           </h3>
                           
                           {/* Hint */}
                           {msg.metadata?.hint && (
-                            <p className="text-center text-sm text-gray-400 mb-4">
+                            <p className="relative text-center text-sm text-gray-400 mb-5">
                               {msg.metadata.hint}
                             </p>
                           )}
                           
-                          {/* Steps */}
-                          <div className="space-y-2 text-xs text-gray-500">
-                            <div className="flex items-center gap-2">
-                              <span className="w-5 h-5 rounded-full bg-white/5 flex items-center justify-center text-[10px] text-gray-400">1</span>
-                              <span>USB 케이블로 Android 디바이스 연결</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="w-5 h-5 rounded-full bg-white/5 flex items-center justify-center text-[10px] text-gray-400">2</span>
-                              <span>설정 → 개발자 옵션 → USB 디버깅 활성화</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="w-5 h-5 rounded-full bg-white/5 flex items-center justify-center text-[10px] text-gray-400">3</span>
-                              <span>디바이스에서 "USB 디버깅 허용" 팝업 승인</span>
-                            </div>
+                          {/* Steps - Modern style */}
+                          <div className="relative space-y-2.5">
+                            {[
+                              { num: 1, text: 'USB 케이블로 Android 디바이스 연결', icon: '🔌' },
+                              { num: 2, text: '설정 → 개발자 옵션 → USB 디버깅 ON', icon: '⚙️' },
+                              { num: 3, text: '"USB 디버깅 허용" 팝업에서 승인', icon: '✅' },
+                            ].map((step, i) => (
+                              <motion.div
+                                key={step.num}
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.3 + i * 0.1 }}
+                                className="flex items-center gap-3 p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.05]"
+                              >
+                                <span className="text-base">{step.icon}</span>
+                                <span className="text-xs text-gray-300">{step.text}</span>
+                              </motion.div>
+                            ))}
                           </div>
                           
                           {/* Terminal hint */}
-                          <div className="mt-4 p-2.5 bg-black/40 rounded-lg border border-white/5">
-                            <code className="text-[11px] text-emerald-400 font-mono">
+                          <motion.div 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.6 }}
+                            className="relative mt-5 p-3 bg-black/50 rounded-xl border border-emerald-500/20"
+                          >
+                            <div className="flex items-center gap-2 mb-1">
+                              <div className="flex gap-1">
+                                <div className="w-2 h-2 rounded-full bg-red-500/60" />
+                                <div className="w-2 h-2 rounded-full bg-yellow-500/60" />
+                                <div className="w-2 h-2 rounded-full bg-green-500/60" />
+                              </div>
+                              <span className="text-[9px] text-gray-500 uppercase tracking-wider">Terminal</span>
+                            </div>
+                            <code className="text-xs text-emerald-400 font-mono">
                               $ adb devices
                             </code>
-                            <p className="text-[10px] text-gray-500 mt-1">
-                              터미널에서 연결 상태를 확인하세요
+                            <p className="text-[10px] text-gray-500 mt-1.5">
+                              연결 상태를 확인하세요
                             </p>
-                          </div>
+                          </motion.div>
                         </div>
                       </div>
                     </motion.div>
