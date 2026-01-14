@@ -41,7 +41,7 @@ export default function Header() {
               </div>
               <p className="text-[#9aa0a6] text-sm font-medium flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                Pseudo Lab <span className="text-white/20">|</span> Agent Studio
+                pseudolab <span className="text-white/20">|</span> 가짜연구소
               </p>
             </div>
           </Link>
