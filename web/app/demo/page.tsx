@@ -552,6 +552,17 @@ export default function Home() {
     { text: '빅맥이랑 상하이스파이시버거 두개 주문해줘', emoji: '🍔' },
   ];
 
+  // Time-based greeting
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 9) return { emoji: '🌅', text: '좋은 새벽이에요' };
+    if (hour >= 9 && hour < 12) return { emoji: '☀️', text: '좋은 아침이에요' };
+    if (hour >= 12 && hour < 17) return { emoji: '🌤️', text: '좋은 오후에요' };
+    if (hour >= 17 && hour < 21) return { emoji: '🌆', text: '좋은 저녁이에요' };
+    return { emoji: '🌙', text: '좋은 밤이에요' };
+  };
+  const greeting = getGreeting();
+
   return (
     <main className="flex min-h-screen flex-col bg-[#111114] text-gray-100 font-sans relative">
       {/* Background - GridScan */}
@@ -577,23 +588,44 @@ export default function Home() {
         {/* Chat Area */}
         <div className="flex-1 overflow-y-auto px-6 py-10 space-y-10 scrollbar-hide">
           {messages.length === 0 && (
-            <div className="h-full flex flex-col items-center justify-center text-center px-4 animate-in fade-in duration-700">
-              <div className="w-20 h-20 mb-6">
-                <img src="/images/gemini-logo.png" alt="Gemini" className="w-full h-full object-contain" />
-              </div>
-              <h2 className="text-3xl font-bold text-white mb-3 tracking-tight">키오스크 에이전트</h2>
-              <p className="text-gray-400 max-w-sm leading-relaxed mb-10">지시 사항을 입력하면 에이전트가 키오스크를 제어하여 주문을 도와드립니다.</p>
-              <div className="flex flex-wrap gap-2.5 justify-center">
-                {quickActions.map((a) => (
-                  <button
+            <div className="h-full flex flex-col items-center justify-center text-center px-4">
+              {/* Time-based Greeting */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
+                className="mb-12"
+              >
+                <h1 className="text-4xl sm:text-5xl font-semibold text-white tracking-tight">
+                  <span className="mr-3">{greeting.emoji}</span>
+                  <span className="bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
+                    {greeting.text},
+                  </span>
+                  <span className="text-amber-400/90 ml-2">KDB</span>
+                  <span className="text-white">님</span>
+                </h1>
+              </motion.div>
+
+              {/* Quick Actions */}
+              <motion.div 
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.3, ease: [0.23, 1, 0.32, 1] }}
+                className="flex flex-wrap gap-2.5 justify-center max-w-2xl"
+              >
+                {quickActions.map((a, i) => (
+                  <motion.button
                     key={a.text}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.4, delay: 0.4 + i * 0.1 }}
                     onClick={() => setInputValue(a.text)}
-                    className="px-5 py-2.5 rounded-2xl bg-white/[0.05] hover:bg-white/[0.12] border border-white/[0.15] text-sm text-gray-300 hover:text-white transition-all duration-300"
+                    className="px-5 py-2.5 rounded-2xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.08] hover:border-white/[0.15] text-sm text-gray-400 hover:text-white transition-all duration-300"
                   >
                     {a.emoji} {a.text}
-                  </button>
+                  </motion.button>
                 ))}
-              </div>
+              </motion.div>
             </div>
           )}
 
