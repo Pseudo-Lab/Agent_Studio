@@ -318,7 +318,7 @@ export function ChatInputBar({
                 ? "bg-amber-400 text-amber-950 hover:bg-red-500 hover:text-white cursor-pointer shadow-amber-400/20 hover:shadow-red-500/20"
                 : "bg-emerald-500 text-white hover:bg-red-500 cursor-pointer shadow-emerald-500/10 hover:shadow-red-500/20"
               : enablePlanning
-                ? "bg-amber-400 text-amber-950 hover:bg-amber-300 disabled:bg-amber-400/30 disabled:text-amber-600 shadow-amber-400/20"
+                ? "bg-amber-400 text-amber-950 hover:bg-amber-300 disabled:bg-amber-400/20 disabled:text-white/40 shadow-amber-400/20"
                 : "bg-emerald-500 text-white hover:bg-emerald-400 disabled:bg-emerald-500/20 disabled:text-white/40 shadow-emerald-500/10"
           }`}
           title={isRunning && !requiresHumanInput ? "클릭하여 정지" : "전송"}
