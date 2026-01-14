@@ -181,7 +181,7 @@ export function ChatInputBar({
 
       <div className="p-6 bg-transparent relative">
         <form onSubmit={onSubmit} className="relative flex items-center gap-3">
-          <div className="flex-1 relative flex items-center group">
+          <div className="flex-1 relative flex items-center">
             {/* 녹음 버튼 - 진하게 */}
             <button
               type="button"
@@ -211,7 +211,7 @@ export function ChatInputBar({
           {/* Planning Toggle & Model Selector - Inside Input */}
           <div className="absolute right-3 flex items-center gap-1">
             {/* Planning Mode Toggle with Tooltip */}
-            <div className="relative group">
+            <div className="relative group/plan">
               <button
                 type="button"
                 onClick={() => setEnablePlanning(!enablePlanning)}
@@ -227,7 +227,7 @@ export function ChatInputBar({
               </button>
               
               {/* Tooltip */}
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-[#1c1c22] border border-white/10 rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none z-50 w-56">
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-[#1c1c22] border border-white/10 rounded-xl opacity-0 invisible group-hover/plan:opacity-100 group-hover/plan:visible transition-all duration-200 pointer-events-none z-50 w-56">
                 <div className="text-xs font-semibold text-white mb-1">
                   {enablePlanning ? "Planning Mode ON" : "Planning Mode"}
                 </div>
