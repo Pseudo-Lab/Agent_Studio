@@ -940,7 +940,7 @@ export default function Home() {
           </AnimatePresence>
 
           {/* Active Streaming Indicator (when no thinking block yet) - hide during HITL */}
-          {isRunning && !requiresHumanInput && !activeInterruptId && messages.filter(m => m.type === 'thinking' && m.isStreaming).length === 0 && (
+          {isRunning && !requiresHumanInput && !activeInterruptId && !(enablePlanning && showPlanningPanel) && messages.filter(m => m.type === 'thinking' && m.isStreaming).length === 0 && (
             <div className="flex items-center gap-3 text-gray-500 pl-2 animate-pulse">
               <Loader2 className="w-4 h-4 animate-spin opacity-40" />
               <span className="text-[13px] font-medium tracking-tight">Initializing agent...</span>
