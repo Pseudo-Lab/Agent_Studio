@@ -176,19 +176,32 @@ export function PlanningPanel({ planningState, isVisible }: Props) {
                 </motion.div>
               )}
 
-              {/* Unknown entities (compact) */}
+              {/* Search targets (prettier UI) */}
               {planningState.unknownEntities.length > 0 && (
-                <div className="flex items-center gap-1.5 py-0.5 flex-wrap">
-                  <span className="text-xs text-gray-600">Unknown:</span>
-                  {planningState.unknownEntities.map((entity, i) => (
-                    <span
-                      key={i}
-                      className="text-xs text-amber-400/80 bg-amber-400/10 px-1.5 py-0.5 rounded"
-                    >
-                      {entity}
-                    </span>
-                  ))}
-                </div>
+                <motion.div 
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex items-center gap-2 py-1.5 mt-1"
+                >
+                  <div className="flex items-center gap-1.5 text-[11px] text-gray-500 font-medium">
+                    <Search className="w-3 h-3" />
+                    <span>Targets</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {planningState.unknownEntities.map((entity, i) => (
+                      <motion.span
+                        key={i}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: i * 0.1 }}
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-amber-200 bg-gradient-to-r from-amber-500/20 to-orange-500/20 px-2.5 py-1 rounded-full border border-amber-400/30 shadow-[0_0_8px_rgba(251,191,36,0.15)]"
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                        {entity}
+                      </motion.span>
+                    ))}
+                  </div>
+                </motion.div>
               )}
             </div>
           </motion.div>
