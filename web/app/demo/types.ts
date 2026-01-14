@@ -19,7 +19,7 @@ export interface CharacterInfo {
 
 export interface ChatMessage {
   id: string;
-  type: "user" | "thinking" | "result" | "system" | "interrupt";
+  type: "user" | "thinking" | "result" | "system" | "interrupt" | "adb_error";
   content: string;
   timestamp: Date;
   isStreaming?: boolean;
@@ -29,6 +29,7 @@ export interface ChatMessage {
   feedback?: "up" | "down" | null;
   audioPath?: string | null; // TTS audio path for interrupt messages
   character?: CharacterInfo | null; // Character for this message
+  metadata?: Record<string, any>; // Additional metadata (e.g., hint for adb_error)
 }
 
 export interface PlanningState {

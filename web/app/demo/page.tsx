@@ -524,7 +524,25 @@ export default function Home() {
         body: JSON.stringify(body),
         signal: abortControllerRef.current.signal,
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      
+      if (!res.ok) {
+        // ADB 연결 에러 등 특별 처리
+        if (res.status === 503) {
+          try {
+            const errorData = await res.json();
+            if (errorData.detail?.error_type === 'adb_connection') {
+              addMessage({ 
+                type: 'adb_error', 
+                content: errorData.detail.message,
+                metadata: { hint: errorData.detail.hint }
+              });
+              setIsRunning(false);
+              return;
+            }
+          } catch {}
+        }
+        throw new Error(`HTTP ${res.status}`);
+      }
 
       const reader = res.body?.getReader();
       if (!reader) throw new Error('No body');
@@ -647,6 +665,80 @@ export default function Home() {
                         {msg.content}
                       </span>
                     </div>
+                  )}
+
+                  {/* ADB Connection Error - Beautiful UI */}
+                  {msg.type === 'adb_error' && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      transition={{ duration: 0.4, ease: "easeOut" }}
+                      className="flex justify-center my-8"
+                    >
+                      <div className="relative max-w-md w-full">
+                        {/* Glow effect */}
+                        <div className="absolute -inset-1 bg-gradient-to-r from-orange-500/20 via-red-500/20 to-orange-500/20 rounded-2xl blur-lg opacity-60" />
+                        
+                        <div className="relative bg-gradient-to-br from-[#1a1a1f] to-[#15151a] border border-white/10 rounded-2xl p-6 shadow-xl">
+                          {/* Icon */}
+                          <div className="flex justify-center mb-4">
+                            <div className="relative">
+                              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-500/20 to-red-500/20 flex items-center justify-center">
+                                <svg className="w-8 h-8 text-orange-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                  <rect x="5" y="2" width="14" height="20" rx="2" />
+                                  <line x1="12" y1="18" x2="12" y2="18.01" strokeWidth="2" strokeLinecap="round" />
+                                  <path d="M9 2V1M15 2V1" strokeLinecap="round" />
+                                </svg>
+                              </div>
+                              {/* Disconnected indicator */}
+                              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center border-2 border-[#1a1a1f]">
+                                <svg className="w-3 h-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                                  <path d="M18 6L6 18M6 6l12 12" />
+                                </svg>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Title */}
+                          <h3 className="text-center text-lg font-semibold text-white mb-2">
+                            {msg.content}
+                          </h3>
+                          
+                          {/* Hint */}
+                          {msg.metadata?.hint && (
+                            <p className="text-center text-sm text-gray-400 mb-4">
+                              {msg.metadata.hint}
+                            </p>
+                          )}
+                          
+                          {/* Steps */}
+                          <div className="space-y-2 text-xs text-gray-500">
+                            <div className="flex items-center gap-2">
+                              <span className="w-5 h-5 rounded-full bg-white/5 flex items-center justify-center text-[10px] text-gray-400">1</span>
+                              <span>USB 케이블로 Android 디바이스 연결</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="w-5 h-5 rounded-full bg-white/5 flex items-center justify-center text-[10px] text-gray-400">2</span>
+                              <span>설정 → 개발자 옵션 → USB 디버깅 활성화</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="w-5 h-5 rounded-full bg-white/5 flex items-center justify-center text-[10px] text-gray-400">3</span>
+                              <span>디바이스에서 "USB 디버깅 허용" 팝업 승인</span>
+                            </div>
+                          </div>
+                          
+                          {/* Terminal hint */}
+                          <div className="mt-4 p-2.5 bg-black/40 rounded-lg border border-white/5">
+                            <code className="text-[11px] text-emerald-400 font-mono">
+                              $ adb devices
+                            </code>
+                            <p className="text-[10px] text-gray-500 mt-1">
+                              터미널에서 연결 상태를 확인하세요
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
                   )}
 
                   {/* Thinking Block - extracted component (keeps Planning inside step area) */}

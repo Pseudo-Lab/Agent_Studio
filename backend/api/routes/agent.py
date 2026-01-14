@@ -105,7 +105,19 @@ async def agent_start(req: StartRequest):
         return streamer.start(req)
     except Exception as e:
         import traceback
-        logger.error(f"Start failed: {e}\n{traceback.format_exc()}")
+        error_msg = str(e)
+        logger.error(f"Start failed: {error_msg}\n{traceback.format_exc()}")
+        
+        # ADB connection error detection
+        if "adb" in error_msg.lower() and ("255" in error_msg or "no devices" in error_msg.lower()):
+            raise HTTPException(
+                status_code=503,
+                detail={
+                    "error_type": "adb_connection",
+                    "message": "Android 디바이스가 연결되어 있지 않습니다",
+                    "hint": "USB 케이블로 디바이스를 연결하고 USB 디버깅을 활성화하세요"
+                }
+            )
         raise HTTPException(status_code=500, detail=str(e))
 
 
