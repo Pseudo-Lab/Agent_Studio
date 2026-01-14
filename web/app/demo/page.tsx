@@ -684,8 +684,19 @@ export default function Home() {
                         />
                         
                         <div className="relative bg-gradient-to-b from-[#1a1a1f] to-[#131316] border border-white/[0.06] rounded-2xl px-6 py-5 shadow-2xl">
+                          {/* Close button */}
+                          <button
+                            type="button"
+                            onClick={() => setMessages(prev => prev.filter(m => m.id !== msg.id))}
+                            className="absolute top-3 right-3 p-1.5 rounded-lg text-gray-500 hover:text-gray-300 hover:bg-white/5 transition-colors"
+                          >
+                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                              <path d="M18 6L6 18M6 6l12 12" />
+                            </svg>
+                          </button>
+                          
                           {/* Header row: Robot + Text side by side */}
-                          <div className="flex items-center gap-5 mb-4">
+                          <div className="flex items-center gap-5 mb-4 pr-6">
                             {/* Android Robot Icon - Compact */}
                             <motion.div
                               animate={{ y: [0, -3, 0] }}
