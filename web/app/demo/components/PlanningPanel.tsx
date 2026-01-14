@@ -62,7 +62,7 @@ export function PlanningPanel({ planningState, isVisible, onClose }: Props) {
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: -20, scale: 0.95 }}
         transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
-        className="w-full mb-4 p-4 rounded-2xl border border-white/[0.10] bg-[#141416]/80 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.35)] relative overflow-hidden"
+        className="w-full p-3 rounded-[24px] border border-white/[0.08] bg-[#141416]/80 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.35)] relative overflow-hidden"
       >
         {/* top accent */}
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-400/35 to-transparent" />
@@ -70,7 +70,7 @@ export function PlanningPanel({ planningState, isVisible, onClose }: Props) {
         {/* Header */}
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex items-start gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center flex-shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center flex-shrink-0">
               {isLoading ? (
                 <Loader2 className={`w-4.5 h-4.5 ${accent.icon} animate-spin`} />
               ) : (
@@ -181,9 +181,9 @@ export function PlanningPanel({ planningState, isVisible, onClose }: Props) {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="mt-3"
+            className="mt-2"
           >
-            <div className="h-1 bg-white/[0.06] rounded-full overflow-hidden">
+            <div className="h-[2px] bg-white/[0.06] rounded-full overflow-hidden">
               <motion.div
                 className="h-full bg-gradient-to-r from-amber-400/80 to-orange-400/80"
                 animate={{ x: ["-100%", "100%"] }}
