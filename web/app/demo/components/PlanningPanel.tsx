@@ -43,6 +43,7 @@ const statusConfig = {
 
 export function PlanningPanel({ planningState, isVisible }: Props) {
   const [isExpanded, setIsExpanded] = useState(true);
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   
   if (!isVisible || !planningState) return null;
 
@@ -204,25 +205,49 @@ export function PlanningPanel({ planningState, isVisible }: Props) {
                 </motion.div>
               )}
 
-              {/* Search context result (show what was found) */}
+              {/* Search context result (collapsible) */}
               {planningState.searchContext && planningState.searchContext.length > 0 && (
                 <motion.div
                   initial={{ opacity: 0, y: 5 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
-                  className="mt-2 py-2"
+                  className="mt-2 py-1"
                 >
-                  <div className="flex items-center gap-1.5 text-[11px] text-gray-500 font-medium mb-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setIsSearchExpanded(!isSearchExpanded)}
+                    className="flex items-center gap-1.5 text-[11px] text-gray-500 font-medium hover:text-gray-400 transition-colors group"
+                  >
+                    <div className="text-gray-600 group-hover:text-gray-500 transition-colors">
+                      {isSearchExpanded ? (
+                        <ChevronDown className="w-3 h-3" />
+                      ) : (
+                        <ChevronRight className="w-3 h-3" />
+                      )}
+                    </div>
                     <Globe className="w-3 h-3" />
                     <span>Search Result</span>
                     <span className="text-emerald-400/70">✓</span>
-                  </div>
-                  <div className="p-2.5 bg-black/30 rounded-lg border border-white/[0.06] text-[11px] text-gray-400 leading-relaxed max-h-24 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10">
-                    {planningState.searchContext.slice(0, 300)}
-                    {planningState.searchContext.length > 300 && (
-                      <span className="text-gray-600">...</span>
+                  </button>
+                  
+                  <AnimatePresence>
+                    {isSearchExpanded && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.15 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="mt-1.5 ml-4 p-2.5 bg-black/30 rounded-lg border border-white/[0.06] text-[11px] text-gray-400 leading-relaxed max-h-32 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10">
+                          {planningState.searchContext.slice(0, 500)}
+                          {planningState.searchContext.length > 500 && (
+                            <span className="text-gray-600">...</span>
+                          )}
+                        </div>
+                      </motion.div>
                     )}
-                  </div>
+                  </AnimatePresence>
                 </motion.div>
               )}
             </div>
