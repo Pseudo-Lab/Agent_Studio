@@ -57,9 +57,8 @@ export interface AGUIEvent {
   // Backward-compat fields (snake_case)
   thread_id?: string;
   run_id?: string;
-  // Character info (backend sends as 'chef' for compatibility)
-  chef?: CharacterInfo;
+  // Character info
+  character?: CharacterInfo;
   // Planning mode enabled flag
   planningEnabled?: boolean;
 }
-

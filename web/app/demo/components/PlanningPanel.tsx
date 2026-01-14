@@ -74,7 +74,7 @@ export function PlanningPanel({ planningState, isVisible }: Props) {
         className="flex items-center gap-2 w-full text-left group"
       >
         {/* Expand/Collapse Icon */}
-        <div className="text-gray-500 group-hover:text-gray-400 transition-colors">
+        <div className="text-white transition-colors">
           {isExpanded ? (
             <ChevronDown className="w-4 h-4" />
           ) : (
@@ -83,14 +83,14 @@ export function PlanningPanel({ planningState, isVisible }: Props) {
         </div>
         
         {/* List Icon */}
-        <SlidersHorizontal className="w-4 h-4 text-gray-500" />
+        <SlidersHorizontal className="w-4 h-4 text-white" />
         
         {/* Title with count */}
-        <span className="text-sm text-gray-400">
+        <span className="text-sm text-white">
           To-dos
         </span>
         {hasSteps && (
-          <span className="text-sm text-gray-500 ml-1">
+          <span className="text-sm text-white ml-1">
             {totalSteps}
           </span>
         )}
@@ -125,7 +125,7 @@ export function PlanningPanel({ planningState, isVisible }: Props) {
                     <div className="flex-shrink-0 mt-0.5">
                       {isCompleted ? (
                         <div className="w-4 h-4 rounded-full bg-transparent flex items-center justify-center">
-                          <Check className="w-3.5 h-3.5 text-gray-500" strokeWidth={2.5} />
+                          <Check className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
                         </div>
                       ) : isCurrent ? (
                         <motion.div
@@ -137,7 +137,7 @@ export function PlanningPanel({ planningState, isVisible }: Props) {
                         </motion.div>
                       ) : (
                         <div className="w-4 h-4 flex items-center justify-center">
-                          <Circle className="w-3 h-3 text-gray-600" />
+                          <Circle className="w-3 h-3 text-white" />
                         </div>
                       )}
                     </div>
@@ -146,10 +146,10 @@ export function PlanningPanel({ planningState, isVisible }: Props) {
                     <span
                       className={`text-sm leading-relaxed ${
                         isCompleted
-                          ? "text-gray-500 line-through decoration-gray-600"
+                          ? "text-white line-through decoration-gray-300"
                           : isCurrent
-                          ? "text-gray-300"
-                          : "text-gray-400"
+                          ? "text-white"
+                          : "text-white"
                       }`}
                     >
                       {step}
@@ -166,9 +166,9 @@ export function PlanningPanel({ planningState, isVisible }: Props) {
                   className="flex items-center gap-2 py-0.5 mt-1"
                 >
                   <div className="w-4 h-4 flex items-center justify-center">
-                    <Loader2 className="w-3.5 h-3.5 text-gray-500 animate-spin" />
+                    <Loader2 className="w-3.5 h-3.5 text-white animate-spin" />
                   </div>
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-white">
                     {planningState.status === "detecting_unknown" && "Analyzing request..."}
                     {planningState.status === "web_search_complete" && "Searching web..."}
                     {planningState.status === "web_search_skipped" && "Creating plan..."}
@@ -184,7 +184,7 @@ export function PlanningPanel({ planningState, isVisible }: Props) {
                   animate={{ opacity: 1, y: 0 }}
                   className="flex items-center gap-2 py-1.5 mt-1"
                 >
-                  <div className="flex items-center gap-1.5 text-[11px] text-gray-500 font-medium">
+                  <div className="flex items-center gap-1.5 text-[11px] text-white font-medium">
                     <Search className="w-3 h-3" />
                     <span>Targets</span>
                   </div>
@@ -216,9 +216,9 @@ export function PlanningPanel({ planningState, isVisible }: Props) {
                   <button
                     type="button"
                     onClick={() => setIsSearchExpanded(!isSearchExpanded)}
-                    className="flex items-center gap-1.5 text-[11px] text-gray-500 font-medium hover:text-gray-400 transition-colors group"
+                    className="flex items-center gap-1.5 text-[11px] text-white font-medium transition-colors group"
                   >
-                    <div className="text-gray-600 group-hover:text-gray-500 transition-colors">
+                    <div className="text-white transition-colors">
                       {isSearchExpanded ? (
                         <ChevronDown className="w-3 h-3" />
                       ) : (
@@ -239,10 +239,10 @@ export function PlanningPanel({ planningState, isVisible }: Props) {
                         transition={{ duration: 0.15 }}
                         className="overflow-hidden"
                       >
-                        <div className="mt-1.5 ml-4 p-2.5 bg-black/30 rounded-lg border border-white/[0.06] text-[11px] text-gray-400 leading-relaxed max-h-32 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10">
+                        <div className="mt-1.5 ml-4 p-2.5 bg-black/30 rounded-lg border border-white/[0.06] text-[11px] text-white leading-relaxed max-h-32 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10">
                           {planningState.searchContext.slice(0, 500)}
                           {planningState.searchContext.length > 500 && (
-                            <span className="text-gray-600">...</span>
+                            <span className="text-gray-200">...</span>
                           )}
                         </div>
                       </motion.div>

@@ -19,7 +19,7 @@ logger = get_logger(__name__)
 class GUI_OUTPUT(BaseModel):
     """Schema for ChatGPT GUI action output."""
     thought: str = Field(description="Agent reasoning (not executed)")
-    action: Literal['CLICK', 'LONG_CLICK', 'SWIPE', 'INPUT', 'BACK', 'HOME'] = Field(
+    action: Literal['CLICK', 'LONG_CLICK', 'SWIPE', 'INPUT', 'BACK', 'HOME', 'INTERRUPT', 'FINISH', 'ABORT'] = Field(
         description="Type of GUI action to perform."
     )
     value: Optional[str] = Field(
@@ -30,6 +30,13 @@ class GUI_OUTPUT(BaseModel):
         description="Normalized (0~1) screen coordinate [x,y] for action.",
         min_length=2,
         max_length=2,
+    )
+
+
+class GUI_OUTPUT_PLANNING(GUI_OUTPUT):
+    """Schema for ChatGPT GUI action output (planning mode)."""
+    step_decision: Literal["repeat", "advance", "abort"] = Field(
+        description="Planning step decision for the current to-do.",
     )
 
 
@@ -48,6 +55,9 @@ class ChatGPTClient(BaseModelClient):
         """Generate action from ChatGPT model."""
         encoded_image = self._encode_image(image)
         
+        output_schema = (
+            GUI_OUTPUT_PLANNING if self.config.output_schema == "planning" else GUI_OUTPUT
+        )
         response = self._client.responses.parse(
             model=self.config.openai_model,
             input=[
@@ -69,7 +79,7 @@ class ChatGPTClient(BaseModelClient):
                     ],
                 },
             ],
-            text_format=GUI_OUTPUT
+            text_format=output_schema
         )
         logger.debug(f"Raw response: {response.output_text}")
         return response.output_text

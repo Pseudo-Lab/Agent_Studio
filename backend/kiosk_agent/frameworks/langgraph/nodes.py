@@ -101,7 +101,16 @@ class NodeMixin:
             raise RuntimeError("Execute node received no model action")
             
         pre_screen = self._get_screen()
-        adb_result = self.translator.execute(model_action.payload, img_size=pre_screen.image.size)
+        payload = model_action.payload or {}
+        enable_planning = getattr(self, "enable_planning", False)
+        if enable_planning and state.get("plan") and payload.get("step_decision") == "abort":
+            return {
+                "status": "executed",
+                "post_action_path": pre_screen.path,
+                "last_adb_commands": [],
+            }
+
+        adb_result = self.translator.execute(payload, img_size=pre_screen.image.size)
         post_screen = self._capture_screen()
         
         logger.debug(f"Executed ADB commands: {len(adb_result.commands)} commands")
@@ -151,22 +160,38 @@ class NodeMixin:
         
         if payload.get("action") == "FINISH":
             status = "task_complete"
+        elif payload.get("action") == "ABORT":
+            status = "aborted"
         elif payload.get("interrupt") or payload.get("action") == "INTERRUPT":
             status = "needs_human"
 
-        # Plan Mode: detect step completion and advance to next step
+        # Plan Mode: use model-guided step decision with fallback heuristics
         plan_step_index = state.get("plan_step_index", 0)
         plan = state.get("plan", [])
         step_completed = False
-        
+
         if getattr(self, 'enable_planning', False) and plan:
             thought = state.get("thought", "") or ""
-            # Detect step completion signals
-            if "단계 완료" in thought or "✅" in thought or "step complete" in thought.lower():
+            decision_raw = payload.get("step_decision")
+            decision = str(decision_raw or "").strip().lower()
+            is_interrupt = bool(payload.get("interrupt")) or payload.get("action") == "INTERRUPT"
+
+            if decision in {"repeat", "advance", "abort"}:
+                if is_interrupt and decision == "advance":
+                    decision = "repeat"
+            else:
+                # Fallback for older prompts/models
+                logger.warning("[Plan Mode] Missing or invalid step_decision; falling back to heuristics")
+                if "단계 완료" in thought or "✅" in thought or "step complete" in thought.lower():
+                    decision = "advance"
+
+            if decision == "abort":
+                status = "aborted"
+            elif decision == "advance":
                 step_completed = True
                 plan_step_index += 1
                 logger.info(f"[Plan Mode] ✅ Step completed! Advancing to step {plan_step_index + 1}/{len(plan)}")
-                
+
                 # Check if all steps completed
                 if plan_step_index >= len(plan):
                     logger.info("[Plan Mode] 🎉 All steps completed!")
@@ -175,6 +200,12 @@ class NodeMixin:
         # Delegate route decision
         temp_state: AgentState = {**state, "status": status, "history": history}
         route = self._determine_route(temp_state)
+        if (
+            route == "end"
+            and iteration >= self.max_iterations
+            and status not in {"task_complete", "aborted", "needs_human"}
+        ):
+            status = "max_iterations"
         
         logger.debug(f"Router: status={status}, route={route}, progress={progress}")
 
@@ -186,12 +217,12 @@ class NodeMixin:
             "difference": diff,
             "current_screen_id": new_screen_id or state.get("current_screen_id"),
             "last_iteration_id": iteration,
+            "step_completed": step_completed,
         }
         
         # Update plan_step_index if step was completed
         if step_completed:
             result["plan_step_index"] = plan_step_index
-            result["step_completed"] = True
         
         return result
 
@@ -268,8 +299,12 @@ class NodeMixin:
                 "backtrack_target_index": target_idx,
             }
             
-        next_route = "loop" if suggested_route == "loop" and state.get("iteration", 0) < self.max_iterations else "end"
-        status = "needs_retry" if next_route == "loop" else "analyzed"
+        iteration = state.get("iteration", 0)
+        next_route = "loop" if suggested_route == "loop" and iteration < self.max_iterations else "end"
+        if next_route == "end" and suggested_route == "loop" and iteration >= self.max_iterations:
+            status = "max_iterations"
+        else:
+            status = "needs_retry" if next_route == "loop" else "analyzed"
         
         return {
             "analysis": analysis_text,

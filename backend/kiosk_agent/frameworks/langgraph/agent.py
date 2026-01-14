@@ -8,6 +8,10 @@ from typing import Any, Dict, Iterator, Optional, cast
 from PIL import Image
 
 from ...config import AgentConfig
+from ...prompts.system import (
+    VLM_GEMINI_SYSTEM_PROMPT,
+    VLM_GEMINI_SYSTEM_PROMPT_PLANNING,
+)
 from ...core import ADBController, ActionTranslator, AndroidScreenshotter, CapturedScreen
 from ...llm import GeminiClient, ChatGPTClient, LocalVLLMClient
 from ...types import AgentState, AgentStepResult, AgentStreamEvent
@@ -61,6 +65,14 @@ class KioskAgent(PlanningMixin, NodeMixin, GraphMixin, BaseAgent):
         self.tts_keep_last_n = config.tts_keep_last_n
         self.enable_tts = enable_tts
         self.enable_planning = enable_planning or config.planning.enabled
+        if self.enable_planning:
+            if config.model.system_prompt == VLM_GEMINI_SYSTEM_PROMPT:
+                config.model.system_prompt = VLM_GEMINI_SYSTEM_PROMPT_PLANNING
+            config.model.output_schema = "planning"
+        else:
+            if config.model.system_prompt == VLM_GEMINI_SYSTEM_PROMPT_PLANNING:
+                config.model.system_prompt = VLM_GEMINI_SYSTEM_PROMPT
+            config.model.output_schema = "standard"
         # NOTE: LangGraph 1.x returns a CompiledGraph; avoid importing version-specific types here.
         self.graph: Optional[Any] = None
         
@@ -177,7 +189,7 @@ class KioskAgent(PlanningMixin, NodeMixin, GraphMixin, BaseAgent):
         final_state = graph.invoke(initial_state, config)
         result = build_result(final_state)
         
-        if self.tts and result.get("status") in ["task_complete", "completed"]:
+        if self.tts and result.get("status") in ["task_complete", "completed", "max_iterations"]:
             self._generate_completion_tts(result)
         
         return result
@@ -221,7 +233,9 @@ class KioskAgent(PlanningMixin, NodeMixin, GraphMixin, BaseAgent):
                 last_entry = result["history"][-1]
                 final_thought = last_entry.get("thought")
             
-            if not final_thought:
+            if result.get("status") == "max_iterations":
+                final_thought = "사용자가 설정한 최대 턴 수에 도달해 종료합니다."
+            elif not final_thought:
                 final_thought = result.get("thought") or "작업이 완료되었습니다."
             
             logger.info(f"TTS generating: {final_thought[:50]}...")

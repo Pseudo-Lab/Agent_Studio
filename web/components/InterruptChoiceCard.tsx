@@ -38,22 +38,22 @@ export default function InterruptChoiceCard({ question, options, reason, disable
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio || !audioUrl) return;
-    
+
     console.log('[InterruptChoiceCard] Setting up audio:', audioUrl);
-    
+
     const handlePlay = () => { console.log('[Audio] Playing'); setIsPlaying(true); };
     const handlePause = () => { console.log('[Audio] Paused'); setIsPlaying(false); };
     const handleEnded = () => { console.log('[Audio] Ended'); setIsPlaying(false); };
     const handleError = (e: Event) => { console.error('[Audio] Error:', e); };
-    
+
     audio.addEventListener("play", handlePlay);
     audio.addEventListener("pause", handlePause);
     audio.addEventListener("ended", handleEnded);
     audio.addEventListener("error", handleError);
-    
+
     // Auto-play
     audio.play().catch((e) => console.error('[Audio] Autoplay failed:', e));
-    
+
     return () => {
       audio.removeEventListener("play", handlePlay);
       audio.removeEventListener("pause", handlePause);
@@ -66,7 +66,7 @@ export default function InterruptChoiceCard({ question, options, reason, disable
     const audio = audioRef.current;
     if (!audio) return;
     if (isPlaying) audio.pause();
-    else audio.play().catch(() => {});
+    else audio.play().catch(() => { });
   };
 
   const normalizedOptions = useMemo(() => {
@@ -112,7 +112,7 @@ export default function InterruptChoiceCard({ question, options, reason, disable
       {/* Glow */}
       <div className="absolute -inset-1.5 rounded-[28px] bg-gradient-to-r from-emerald-500/18 via-emerald-500/8 to-emerald-500/10 blur-xl opacity-60" />
 
-      <div className="relative overflow-hidden rounded-[28px] border border-emerald-500/14 bg-[#0f0f12]/55 backdrop-blur-xl shadow-[0_0_0_1px_rgba(255,255,255,0.04),0_20px_60px_rgba(0,0,0,0.55)]">
+      <div className="relative overflow-hidden rounded-[28px] border border-emerald-500/14 bg-[#0f0f12]/90 backdrop-blur-xl shadow-[0_0_0_1px_rgba(255,255,255,0.04),0_20px_60px_rgba(0,0,0,0.55)]">
         {/* Subtle gradient wash */}
         <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-transparent to-transparent" />
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent" />
@@ -127,10 +127,10 @@ export default function InterruptChoiceCard({ question, options, reason, disable
             {character?.imagePath && (
               <div className="flex flex-col items-center flex-shrink-0 w-16">
                 <div className="w-14 h-14 mb-1.5">
-                  <img 
-                    src={character.imagePath} 
-                    alt={character.nickname} 
-                    className="w-full h-full object-cover rounded-full border-2 border-emerald-500/50 shadow-[0_0_16px_rgba(52,211,153,0.25)]" 
+                  <img
+                    src={character.imagePath}
+                    alt={character.nickname}
+                    className="w-full h-full object-cover rounded-full border-2 border-emerald-500/50 shadow-[0_0_16px_rgba(52,211,153,0.25)]"
                   />
                 </div>
                 <span className="text-[10px] font-bold text-emerald-400 text-center">
@@ -150,11 +150,10 @@ export default function InterruptChoiceCard({ question, options, reason, disable
                   <button
                     type="button"
                     onClick={toggleAudio}
-                    className={`flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                      isPlaying 
-                        ? 'bg-emerald-500/25 text-emerald-300 shadow-[0_0_12px_rgba(52,211,153,0.2)]' 
+                    className={`flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${isPlaying
+                        ? 'bg-emerald-500/25 text-emerald-300 shadow-[0_0_12px_rgba(52,211,153,0.2)]'
                         : 'bg-white/5 text-gray-400 hover:text-emerald-300 hover:bg-emerald-500/10'
-                    }`}
+                      }`}
                     title={isPlaying ? "일시정지" : "음성으로 듣기"}
                   >
                     {isPlaying ? (
@@ -182,9 +181,8 @@ export default function InterruptChoiceCard({ question, options, reason, disable
           {normalizedOptions.length > 0 && (
             <div className="mt-4">
               <div
-                className={`grid gap-2.5 ${
-                  cols === 3 ? "grid-cols-1 sm:grid-cols-3" : "grid-cols-1 sm:grid-cols-2"
-                }`}
+                className={`grid gap-2.5 ${cols === 3 ? "grid-cols-1 sm:grid-cols-3" : "grid-cols-1 sm:grid-cols-2"
+                  }`}
               >
                 {normalizedOptions.map((opt, idx) => {
                   const isSelected = selected === opt;

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
+import {
   Loader2,
 } from 'lucide-react';
 
@@ -63,7 +63,7 @@ export default function Home() {
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [selectedModel, setSelectedModel] = useState<string>("gemini-flash");
   const [showModelSelector, setShowModelSelector] = useState(false);
-  
+
   // Planning Mode
   const [enablePlanning, setEnablePlanning] = useState(false);
   const [planningState, setPlanningState] = useState<PlanningState | null>(null);
@@ -71,7 +71,7 @@ export default function Home() {
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
-  const latestTtsAudioPathRef = useRef<string | null>(null);  // Track latest TTS audio for result message
+  const latestTtsAudioPathRef = useRef<string | null>(null);  // Track pending HITL TTS audio
 
   // Auto-scroll
   useEffect(() => {
@@ -115,7 +115,7 @@ export default function Home() {
   const addThinkingStep = useCallback((step: ThinkingStep) => {
     const thinkingId = currentThinkingIdRef.current;
     if (!thinkingId) return;
-    
+
     setMessages(prev => prev.map(m => {
       if (m.id === thinkingId && m.type === 'thinking') {
         const steps = m.steps || [];
@@ -129,8 +129,8 @@ export default function Home() {
   const finalizeThinking = useCallback(() => {
     const thinkingId = currentThinkingIdRef.current;
     if (!thinkingId) return;
-    
-    setMessages(prev => prev.map(m => 
+
+    setMessages(prev => prev.map(m =>
       m.id === thinkingId ? { ...m, isStreaming: false } : m
     ));
   }, []);
@@ -182,9 +182,8 @@ export default function Home() {
       if (startedThreadId && !threadId) {
         setThreadId(startedThreadId);
       }
-      // 셰프 정보 설정 (세션 시작 시)
-      // Backend sends character info as 'chef' key for compatibility
-      const startCharacter: CharacterInfo | undefined = (event as any).chef;
+      // 캐릭터 정보 설정 (세션 시작 시)
+      const startCharacter: CharacterInfo | undefined = (event as any).character;
       if (startCharacter) {
         console.log('[RUN_STARTED] Character assigned:', startCharacter.nickname);
         currentCharacterRef.current = startCharacter;
@@ -210,7 +209,7 @@ export default function Home() {
       finalizeThinking();
       setIsRunning(false);
       setActiveInterruptId(null);
-      
+
       // Add result message based on status
       const result = (event as any).result;
       const status =
@@ -237,9 +236,8 @@ export default function Home() {
         } else if (!finalThought && finalAction) {
           resultMsg = `${finalAction} 작업을 수행했습니다.`;
         }
-        // Attach TTS audio path and character info if available
-        const ttsPath = latestTtsAudioPathRef.current;
-        const characterInfo: CharacterInfo | undefined = (event as any).chef ?? result?.chef;
+        // Attach character info if available
+        const characterInfo: CharacterInfo | undefined = (event as any).character ?? result?.character;
         // 캐릭터 정보 저장
         if (characterInfo) {
           currentCharacterRef.current = characterInfo;
@@ -248,10 +246,9 @@ export default function Home() {
         addMessage({
           type: 'result',
           content: resultMsg,
-          audioPath: ttsPath,
           character: characterInfo || currentCharacterRef.current,
         });
-        latestTtsAudioPathRef.current = null;  // Clear after use
+        latestTtsAudioPathRef.current = null;
       }
     }
 
@@ -264,11 +261,11 @@ export default function Home() {
 
     if (event.type === 'STATE_SNAPSHOT' && event.snapshot) {
       const s = event.snapshot;
-      
+
       if (s.thought) {
         // 백엔드에서 받은 iteration 사용
         setCurrentStep(s.iteration || 0);
-        
+
         addThinkingStep({
           id: crypto.randomUUID(),
           thought: s.thought,
@@ -293,9 +290,9 @@ export default function Home() {
           s.interrupt?.questionList;
         const options = Array.isArray(rawOptions)
           ? rawOptions
-              .filter((v: any) => typeof v === 'string' && v.trim())
-              .map((v: string) => v.trim())
-              .slice(0, 10)
+            .filter((v: any) => typeof v === 'string' && v.trim())
+            .map((v: string) => v.trim())
+            .slice(0, 10)
           : undefined;
         // 이미 본 질문이면 표시 안함 (Set으로 추적)
         if (!seenInterruptsRef.current.has(question)) {
@@ -312,6 +309,7 @@ export default function Home() {
             audioPath: savedAudioPath || undefined,  // 저장된 TTS 오디오
           });
           setActiveInterruptId(interruptMsgId);
+          latestTtsAudioPathRef.current = null;
           console.log('[Interrupt] Created with character:', currentCharacterRef.current?.nickname, 'audioPath:', savedAudioPath);
         }
         setRequiresHumanInput(true);
@@ -324,8 +322,8 @@ export default function Home() {
 
     if (event.type === 'CUSTOM' && event.name === 'waiting_human') {
       setRequiresHumanInput(true);
-      // waiting_human 이벤트에서 캐릭터 정보 추출 및 저장 (backend sends as 'chef')
-      const hitlCharacter: CharacterInfo | undefined = (event as any).value?.chef;
+      // waiting_human 이벤트에서 캐릭터 정보 추출 및 저장
+      const hitlCharacter: CharacterInfo | undefined = (event as any).value?.character;
       if (hitlCharacter) {
         console.log('[HITL] Character info received:', hitlCharacter);
         currentCharacterRef.current = hitlCharacter;
@@ -336,7 +334,7 @@ export default function Home() {
           const latestInterrupt = interruptMsgs[interruptMsgs.length - 1];
           if (latestInterrupt) {
             console.log('[HITL] Attaching character to interrupt:', latestInterrupt.id, hitlCharacter.nickname);
-            return prev.map(m => 
+            return prev.map(m =>
               m.id === latestInterrupt.id ? { ...m, character: hitlCharacter } : m
             );
           }
@@ -345,30 +343,34 @@ export default function Home() {
       }
     }
 
-    // TTS audio generated - attach to current interrupt message or save for result
+    // TTS audio generated - attach to interrupt or save until interrupt arrives
     if (event.type === 'CUSTOM' && event.name === 'tts_generated') {
       const audioPath =
         (event as any).value?.audioPath ??
         (event as any).value?.audio_path;
       console.log('[TTS Event] audioPath:', audioPath);
       if (audioPath) {
-        // Save for potential use in result message
-        latestTtsAudioPathRef.current = audioPath;
-        
+        let attached = false;
         // Always try to update the latest interrupt message (항상 업데이트)
         setMessages(prev => {
           // Find the most recent interrupt message
           const interruptMsgs = prev.filter(m => m.type === 'interrupt');
           const latestInterrupt = interruptMsgs[interruptMsgs.length - 1];
           if (latestInterrupt) {
+            attached = true;
             console.log('[TTS] Attaching audio to interrupt:', latestInterrupt.id, audioPath);
-            return prev.map(m => 
+            return prev.map(m =>
               m.id === latestInterrupt.id ? { ...m, audioPath } : m
             );
           }
-          console.log('[TTS] No interrupt message found yet, saved for later');
           return prev;
         });
+        if (attached) {
+          latestTtsAudioPathRef.current = null;
+        } else {
+          latestTtsAudioPathRef.current = audioPath;
+          console.log('[TTS] No interrupt message found yet, saved for later');
+        }
       }
     }
 
@@ -450,8 +452,9 @@ export default function Home() {
       return;
     }
 
-    // 새 작업 시작 - interrupt 기록 초기화, 셰프 초기화, Planning 초기화
+    // 새 작업 시작 - interrupt 기록 초기화, 캐릭터 초기화, Planning 초기화
     seenInterruptsRef.current.clear();
+    latestTtsAudioPathRef.current = null;
     setCurrentCharacter(null);  // 새 세션에서 새 캐릭터 할당을 위해 초기화
     currentCharacterRef.current = null;
     setPlanningState(null);  // Planning 상태 초기화
@@ -460,8 +463,8 @@ export default function Home() {
     setCurrentStep(0);
     const newThreadId = crypto.randomUUID();
     setThreadId(newThreadId);
-    await startStream('/api/agent/start', { 
-      instruction: userInput, 
+    await startStream('/api/agent/start', {
+      instruction: userInput,
       thread_id: newThreadId,
       model: selectedModel,
       enable_planning: enablePlanning,
@@ -507,7 +510,7 @@ export default function Home() {
     },
     [BACKEND_URL, addMessage, finalizeThinking, threadId]
   );
-  
+
   const startStream = async (url: string, body: object) => {
     console.log('[startStream] Called with url:', url, 'body:', body);
     if (abortControllerRef.current) abortControllerRef.current.abort();
@@ -525,22 +528,22 @@ export default function Home() {
         body: JSON.stringify(body),
         signal: abortControllerRef.current.signal,
       });
-      
+
       if (!res.ok) {
         // ADB 연결 에러 등 특별 처리
         if (res.status === 503) {
           try {
             const errorData = await res.json();
             if (errorData.detail?.error_type === 'adb_connection') {
-              addMessage({ 
-                type: 'adb_error', 
+              addMessage({
+                type: 'adb_error',
                 content: errorData.detail.message,
                 metadata: { hint: errorData.detail.hint }
               });
               setIsRunning(false);
               return;
             }
-          } catch {}
+          } catch { }
         }
         throw new Error(`HTTP ${res.status}`);
       }
@@ -554,13 +557,13 @@ export default function Home() {
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        
+
         buffer += decoder.decode(value, { stream: true });
-        
+
         // SSE는 \n\n으로 구분됨
         const events = buffer.split('\n\n');
         buffer = events.pop() || '';
-        
+
         for (const eventStr of events) {
           const trimmed = eventStr.trim();
           if (trimmed.startsWith('data:')) {
@@ -619,178 +622,178 @@ export default function Home() {
           scanDelay={1.5}
         />
       </div>
-      
+
       <div className="relative z-10 flex flex-col flex-1">
         <Header />
-      
-      <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full pt-2">
-        {/* Chat Area */}
-        <div className="flex-1 overflow-y-auto px-6 py-10 scrollbar-hide">
-          <div className="space-y-10">
-            {messages.length === 0 && (
-              <WelcomeScreen
-                quickActions={quickActions}
-                greeting={greeting}
-                onQuickAction={setInputValue}
-              />
-            )}
 
-            {/* Message List */}
-            <AnimatePresence mode="popLayout">
-              {messages.map((msg) => {
-                const isThinkingExpanded = expandedThinking.has(msg.id);
+        <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full pt-2">
+          {/* Chat Area */}
+          <div className="flex-1 overflow-y-auto px-6 py-10 scrollbar-hide">
+            <div className="space-y-10">
+              {messages.length === 0 && (
+                <WelcomeScreen
+                  quickActions={quickActions}
+                  greeting={greeting}
+                  onQuickAction={setInputValue}
+                />
+              )}
 
-                return (
-                  <motion.div
-                    key={msg.id}
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-                    className="w-full"
-                  >
-                  {/* User Message - Claude Style */}
-                  {msg.type === 'user' && (
-                    <div className="flex justify-end mb-4">
-                      <div className="flex flex-col items-end max-w-[85%]">
-                        <div className="px-5 py-3.5 rounded-[24px] rounded-br-md bg-[#2f2f32] text-white shadow-sm border border-white/5">
-                          <p className="text-[15px] leading-relaxed font-normal">{msg.content}</p>
+              {/* Message List */}
+              <AnimatePresence mode="popLayout">
+                {messages.map((msg) => {
+                  const isThinkingExpanded = expandedThinking.has(msg.id);
+
+                  return (
+                    <motion.div
+                      key={msg.id}
+                      initial={{ opacity: 0, y: 15 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                      className="w-full"
+                    >
+                      {/* User Message - Claude Style */}
+                      {msg.type === 'user' && (
+                        <div className="flex justify-end mb-4">
+                          <div className="flex flex-col items-end max-w-[85%]">
+                            <div className="px-5 py-3.5 rounded-[24px] rounded-br-md bg-[#2f2f32] text-white shadow-sm border border-white/5">
+                              <p className="text-[15px] leading-relaxed font-normal">{msg.content}</p>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  )}
+                      )}
 
-                  {/* System Message */}
-                  {msg.type === 'system' && (
-                    <div className="flex justify-center my-8">
-                      <span className="text-[11px] text-gray-400 bg-white/[0.05] border border-white/[0.08] px-4 py-1.5 rounded-full tracking-tight">
-                        {msg.content}
-                      </span>
-                    </div>
-                  )}
+                      {/* System Message */}
+                      {msg.type === 'system' && (
+                        <div className="flex justify-center my-8">
+                          <span className="text-[11px] text-gray-400 bg-white/[0.05] border border-white/[0.08] px-4 py-1.5 rounded-full tracking-tight">
+                            {msg.content}
+                          </span>
+                        </div>
+                      )}
 
-                  {/* ADB Connection Error */}
-                  {msg.type === 'adb_error' && (
-                    <AdbErrorCard onClose={() => setMessages(prev => prev.filter(m => m.id !== msg.id))} />
-                  )}
+                      {/* ADB Connection Error */}
+                      {msg.type === 'adb_error' && (
+                        <AdbErrorCard onClose={() => setMessages(prev => prev.filter(m => m.id !== msg.id))} />
+                      )}
 
-                  {/* Thinking Block - extracted component (keeps Planning inside step area) */}
-                  {msg.type === 'thinking' && (msg.isStreaming || (msg.steps && msg.steps.length > 0)) && (
-                    <ThinkingBlock
-                      msg={msg}
-                      isExpanded={isThinkingExpanded}
-                      onToggle={() => toggleThinking(msg.id)}
-                      actionColors={actionColors}
-                      isValidBox2d={isValidBox2d}
-                      enablePlanning={enablePlanning}
-                      showPlanningPanel={showPlanningPanel}
-                      planningState={planningState}
-                      isCurrentThinking={msg.id === currentThinkingIdRef.current}
-                      onClosePlanning={() => setShowPlanningPanel(false)}
-                    />
-                  )}
-
-                  {/* Result Message - extracted component */}
-                  {msg.type === 'result' && (
-                    <ResultMessage
-                      msg={msg}
-                      copiedMessageId={copiedMessageId}
-                      isRunning={isRunning}
-                      onRetry={() => {
-                        const idx = messages.findIndex(m => m.id === msg.id);
-                        const prompt = idx >= 0
-                          ? [...messages].slice(0, idx).reverse().find(m => m.type === 'user')?.content
-                          : undefined;
-                        if (!prompt || isRunning) return;
-
-                        seenInterruptsRef.current.clear();
-                        setIsRunning(true);
-                        setRequiresHumanInput(false);
-                        setActiveInterruptId(null);
-                        setCurrentStep(0);
-                        const newThreadId = crypto.randomUUID();
-                        setThreadId(newThreadId);
-                        startStream('/api/agent/start', {
-                          instruction: prompt,
-                          thread_id: newThreadId,
-                          model: selectedModel,
-                          enable_planning: enablePlanning,
-                        });
-                      }}
-                      onFeedback={(fb) => setMessageFeedback(msg.id, fb)}
-                      onCopy={() => copyMessage(msg.id, msg.content)}
-                    />
-                  )}
-
-                  {/* Interrupt - Elegant Notice Style with Character */}
-                  {msg.type === 'interrupt' && (
-                    <div className="flex items-start gap-5 my-10 pl-1">
-                      <div className="flex-1">
-                        <InterruptChoiceCard
-                          question={msg.content}
-                          options={msg.options}
-                          reason={msg.reason}
-                          audioPath={msg.audioPath}
-                          character={msg.character}
-                          disabled={
-                            isRunning ||
-                            !requiresHumanInput ||
-                            !threadId ||
-                            (activeInterruptId !== null && msg.id !== activeInterruptId)
-                          }
-                          onSelect={submitInterruptOption}
+                      {/* Thinking Block - extracted component (keeps Planning inside step area) */}
+                      {msg.type === 'thinking' && (msg.isStreaming || (msg.steps && msg.steps.length > 0)) && (
+                        <ThinkingBlock
+                          msg={msg}
+                          isExpanded={isThinkingExpanded}
+                          onToggle={() => toggleThinking(msg.id)}
+                          actionColors={actionColors}
+                          isValidBox2d={isValidBox2d}
+                          enablePlanning={enablePlanning}
+                          showPlanningPanel={showPlanningPanel}
+                          planningState={planningState}
+                          isCurrentThinking={msg.id === currentThinkingIdRef.current}
+                          onClosePlanning={() => setShowPlanningPanel(false)}
                         />
-                      </div>
-                    </div>
-                  )}
-                </motion.div>
-              );
-            })}
-          </AnimatePresence>
+                      )}
 
-          {/* Active Streaming Indicator (when no thinking block yet) - hide during HITL */}
-          {isRunning && !requiresHumanInput && !activeInterruptId && !(enablePlanning && showPlanningPanel) && messages.filter(m => m.type === 'thinking' && m.isStreaming).length === 0 && (
-            <div className="flex items-center gap-3 text-gray-500 pl-2 animate-pulse">
-              <Loader2 className="w-4 h-4 animate-spin opacity-40" />
-              <span className="text-[13px] font-medium tracking-tight">Initializing agent...</span>
+                      {/* Result Message - extracted component */}
+                      {msg.type === 'result' && (
+                        <ResultMessage
+                          msg={msg}
+                          copiedMessageId={copiedMessageId}
+                          isRunning={isRunning}
+                          onRetry={() => {
+                            const idx = messages.findIndex(m => m.id === msg.id);
+                            const prompt = idx >= 0
+                              ? [...messages].slice(0, idx).reverse().find(m => m.type === 'user')?.content
+                              : undefined;
+                            if (!prompt || isRunning) return;
+
+                            seenInterruptsRef.current.clear();
+                            setIsRunning(true);
+                            setRequiresHumanInput(false);
+                            setActiveInterruptId(null);
+                            setCurrentStep(0);
+                            const newThreadId = crypto.randomUUID();
+                            setThreadId(newThreadId);
+                            startStream('/api/agent/start', {
+                              instruction: prompt,
+                              thread_id: newThreadId,
+                              model: selectedModel,
+                              enable_planning: enablePlanning,
+                            });
+                          }}
+                          onFeedback={(fb) => setMessageFeedback(msg.id, fb)}
+                          onCopy={() => copyMessage(msg.id, msg.content)}
+                        />
+                      )}
+
+                      {/* Interrupt - Elegant Notice Style with Character */}
+                      {msg.type === 'interrupt' && (
+                        <div className="flex items-start gap-5 my-10 pl-1">
+                          <div className="flex-1">
+                            <InterruptChoiceCard
+                              question={msg.content}
+                              options={msg.options}
+                              reason={msg.reason}
+                              audioPath={msg.audioPath}
+                              character={msg.character}
+                              disabled={
+                                isRunning ||
+                                !requiresHumanInput ||
+                                !threadId ||
+                                (activeInterruptId !== null && msg.id !== activeInterruptId)
+                              }
+                              onSelect={submitInterruptOption}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
+
+              {/* Active Streaming Indicator (when no thinking block yet) - hide during HITL */}
+              {isRunning && !requiresHumanInput && !activeInterruptId && !(enablePlanning && showPlanningPanel) && messages.filter(m => m.type === 'thinking' && m.isStreaming).length === 0 && (
+                <div className="flex items-center gap-3 text-gray-500 pl-2 animate-pulse">
+                  <Loader2 className="w-4 h-4 animate-spin opacity-40" />
+                  <span className="text-[13px] font-medium tracking-tight">Initializing agent...</span>
+                </div>
+              )}
+
+              <div ref={chatEndRef} />
+            </div>
+          </div>
+
+
+          {/* Status Bar */}
+          {(isRunning || currentStep > 0) && (
+            <div className="px-6 py-2.5 border-t border-white/[0.03] bg-black/20 flex items-center justify-between text-[10px] font-bold text-gray-600 uppercase tracking-[0.2em]">
+              <div className="flex items-center gap-4">
+                <span>Step {currentStep}</span>
+                {isRunning && <span className="text-emerald-500/60 flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.4)]" /> Active</span>}
+                {requiresHumanInput && <span className="text-yellow-500/60">Awaiting Response</span>}
+              </div>
             </div>
           )}
 
-          <div ref={chatEndRef} />
-          </div>
+          <ChatInputBar
+            inputValue={inputValue}
+            setInputValue={setInputValue}
+            requiresHumanInput={requiresHumanInput}
+            isRunning={isRunning}
+            isRecording={isRecording}
+            isTranscribing={isTranscribing}
+            onStartRecording={handleStartRecording}
+            onStopRecording={handleStopRecording}
+            selectedModel={selectedModel}
+            setSelectedModel={setSelectedModel}
+            showModelSelector={showModelSelector}
+            setShowModelSelector={setShowModelSelector}
+            enablePlanning={enablePlanning}
+            setEnablePlanning={setEnablePlanning}
+            onSubmit={handleSubmit}
+            onStop={handleStop}
+            disableSubmit={!isRunning && !requiresHumanInput && !inputValue.trim()}
+          />
         </div>
-
-
-        {/* Status Bar */}
-        {(isRunning || currentStep > 0) && (
-          <div className="px-6 py-2.5 border-t border-white/[0.03] bg-black/20 flex items-center justify-between text-[10px] font-bold text-gray-600 uppercase tracking-[0.2em]">
-            <div className="flex items-center gap-4">
-              <span>Step {currentStep}</span>
-              {isRunning && <span className="text-emerald-500/60 flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.4)]" /> Active</span>}
-              {requiresHumanInput && <span className="text-yellow-500/60">Awaiting Response</span>}
-            </div>
-          </div>
-        )}
-
-        <ChatInputBar
-          inputValue={inputValue}
-          setInputValue={setInputValue}
-          requiresHumanInput={requiresHumanInput}
-          isRunning={isRunning}
-          isRecording={isRecording}
-          isTranscribing={isTranscribing}
-          onStartRecording={handleStartRecording}
-          onStopRecording={handleStopRecording}
-          selectedModel={selectedModel}
-          setSelectedModel={setSelectedModel}
-          showModelSelector={showModelSelector}
-          setShowModelSelector={setShowModelSelector}
-          enablePlanning={enablePlanning}
-          setEnablePlanning={setEnablePlanning}
-          onSubmit={handleSubmit}
-          onStop={handleStop}
-          disableSubmit={!isRunning && !requiresHumanInput && !inputValue.trim()}
-        />
-      </div>
       </div>
     </main>
   );

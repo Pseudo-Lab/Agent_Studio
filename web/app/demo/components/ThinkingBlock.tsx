@@ -41,31 +41,30 @@ export function ThinkingBlock({
   );
 
   return (
-    <div className="mb-10 pl-1">
-      {/* Thinking Header (subtle) */}
-      <div className="opacity-50 hover:opacity-80 transition-opacity duration-300">
+    <div className="mb-10 pl-1 text-white">
+      {/* Thinking Header */}
+      <div className="opacity-100">
         <button
           onClick={onToggle}
-          className="flex items-center gap-3 text-gray-400 hover:text-gray-200 transition-all group w-full text-left"
+          className="flex items-center gap-3 text-white transition-all group w-full text-left"
         >
           <div className="flex items-center justify-center w-5 h-5 rounded-full bg-white/[0.03] border border-white/[0.05] group-hover:bg-white/[0.08] transition-colors">
             <ChevronDown
-              className={`w-3 h-3 transition-transform duration-300 ${
-                isExpanded ? "" : "-rotate-90"
-              }`}
+              className={`w-3 h-3 transition-transform duration-300 ${isExpanded ? "" : "-rotate-90"
+                }`}
             />
           </div>
           {msg.isStreaming ? (
             <ShinyText
               text="Agent is thinking..."
               className="text-[13px] font-medium tracking-tight"
-              color="#6b7280"
+              color="#ffffff"
               shineColor="#ffffff"
               speed={1.5}
               spread={100}
             />
           ) : (
-            <span className="text-[13px] font-medium tracking-tight opacity-80">
+            <span className="text-[13px] font-medium tracking-tight text-white">
               Thought process ({msg.steps?.length || 0} steps)
             </span>
           )}
@@ -118,35 +117,33 @@ export function ThinkingBlock({
 
                   <div className="space-y-3.5">
                     <div className="flex items-center gap-3">
-                      <span className="text-[10px] font-bold text-gray-600 uppercase tracking-[0.15em]">
+                      <span className="text-[10px] font-bold text-white uppercase tracking-[0.15em]">
                         Step {step.iteration || idx + 1}
                       </span>
                       {step.action && (
                         <span
-                          className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-sm bg-white/[0.03] ${
-                            actionColors[step.action] || "text-gray-500"
-                          }`}
+                          className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-sm bg-white/[0.08] ${actionColors[step.action] || "text-white"
+                            }`}
                         >
                           {step.action}
                         </span>
                       )}
                     </div>
 
-                    <p className="text-[14px] text-gray-300 leading-[1.7] font-normal max-w-[95%]">
+                    <p className="text-[14px] text-white leading-[1.7] font-normal max-w-[95%]">
                       {step.thought}
                     </p>
 
-                    {/* Sub-data - very subtle */}
+                    {/* Sub-data */}
                     <div className="flex flex-wrap gap-3 pt-1">
                       {typeof step.progress === "boolean" && (
                         <div
-                          className={`font-mono text-[11px] px-2.5 py-1 rounded inline-flex items-center gap-2 ${
-                            step.progress
-                              ? "text-emerald-400/70 bg-emerald-500/5"
-                              : "text-gray-600 bg-white/[0.02]"
+                          className={`font-mono text-[11px] px-2.5 py-1 rounded inline-flex items-center gap-2 ${step.progress
+                          ? "text-emerald-200 bg-emerald-500/15"
+                          : "text-white bg-white/[0.12]"
                           }`}
                         >
-                          <span className="opacity-60">result</span>
+                          <span>result</span>
                           <span className="font-semibold">
                             {step.progress ? "progress" : "no-progress"}
                           </span>
@@ -154,8 +151,8 @@ export function ThinkingBlock({
                       )}
 
                       {typeof step.difference === "number" && (
-                        <div className="font-mono text-[11px] text-gray-600 bg-white/[0.02] px-2.5 py-1 rounded inline-flex items-center gap-2">
-                          <span className="opacity-60">Δ</span>
+                        <div className="font-mono text-[11px] text-white bg-white/[0.12] px-2.5 py-1 rounded inline-flex items-center gap-2">
+                          <span>Δ</span>
                           <span className="font-semibold">
                             {step.difference.toFixed(4)}
                           </span>
@@ -163,8 +160,8 @@ export function ThinkingBlock({
                       )}
 
                       {step.status && (
-                        <div className="font-mono text-[11px] text-gray-600 bg-white/[0.02] px-2.5 py-1 rounded inline-flex items-center gap-2">
-                          <span className="opacity-60">status</span>
+                        <div className="font-mono text-[11px] text-white bg-white/[0.12] px-2.5 py-1 rounded inline-flex items-center gap-2">
+                          <span>status</span>
                           <span className="font-semibold">
                             {String(step.status)}
                           </span>
@@ -172,9 +169,9 @@ export function ThinkingBlock({
                       )}
 
                       {step.adb_commands && step.adb_commands.length > 0 && (
-                        <div className="font-mono text-[11px] text-gray-600 bg-white/[0.02] px-2.5 py-1 rounded inline-flex items-center gap-2">
-                          <Terminal className="w-2.5 h-2.5 opacity-40" />
-                          <span className="opacity-20">$</span>{" "}
+                        <div className="font-mono text-[11px] text-white bg-white/[0.12] px-2.5 py-1 rounded inline-flex items-center gap-2">
+                          <Terminal className="w-2.5 h-2.5" />
+                          <span>$</span>{" "}
                           {String(step.adb_commands[0] || "").substring(0, 45)}
                           ...
                         </div>
@@ -198,7 +195,7 @@ export function ThinkingBlock({
                   className="relative"
                 >
                   <div className="absolute -left-7 top-1.5 w-2 h-2 rounded-full bg-emerald-500/30 animate-pulse" />
-                  <span className="text-[13px] text-gray-600 font-medium animate-pulse pl-1">
+                  <span className="text-[13px] text-white font-medium animate-pulse pl-1">
                     Thinking...
                   </span>
                 </motion.div>
@@ -210,4 +207,3 @@ export function ThinkingBlock({
     </div>
   );
 }
-

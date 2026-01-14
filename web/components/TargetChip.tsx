@@ -34,14 +34,13 @@ export default function TargetChip({ box, label = "Target" }: Props) {
   return (
     <div
       title={title}
-      className="inline-flex items-center gap-2 rounded-full border border-emerald-500/15 bg-emerald-500/[0.06] px-3 py-1.5 text-emerald-100/70 shadow-[0_0_0_1px_rgba(255,255,255,0.03)]"
+      className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/[0.12] px-3 py-1.5 text-emerald-100 shadow-[0_0_0_1px_rgba(255,255,255,0.05)]"
     >
-      <span className="text-[11px] font-extrabold tracking-[0.16em] uppercase opacity-85">{label}</span>
-      <span className="font-mono text-[11px] tabular-nums text-emerald-100/45">
+      <span className="text-[11px] font-extrabold tracking-[0.16em] uppercase">{label}</span>
+      <span className="font-mono text-[11px] tabular-nums text-emerald-100">
         x{meta.cx} y{meta.cy}
       </span>
     </div>
   );
 }
-
 

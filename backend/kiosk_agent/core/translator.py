@@ -92,6 +92,12 @@ class ActionTranslator:
         elif action == "INTERRUPT":
             # INTERRUPT requires no ADB commands, but flags the need for human input
             status = "waiting_human"
+        elif action == "FINISH":
+            # FINISH ends the workflow without device interaction
+            status = "completed"
+        elif action == "ABORT":
+            # ABORT ends the workflow without device interaction
+            status = "aborted"
         else:
             raise NotImplementedError(f"Unsupported action '{action}'.")
 

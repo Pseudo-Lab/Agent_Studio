@@ -54,11 +54,15 @@ class CosyVoiceTTS:
         if output_dir:
             self.output_dir = output_dir
         else:
+            project_root = Path(__file__).resolve().parents[3]
             env_dir = os.getenv("TTS_OUTPUT_DIR")
             if env_dir:
-                self.output_dir = Path(env_dir)
+                tts_dir = Path(env_dir)
+                if not tts_dir.is_absolute():
+                    tts_dir = project_root / tts_dir
+                self.output_dir = tts_dir
             else:
-                self.output_dir = Path(__file__).resolve().parents[3] / "screenshots" / "tts_output"
+                self.output_dir = project_root / "screenshots" / "tts_output"
         self.output_dir.mkdir(parents=True, exist_ok=True)
         # NOTE: generate_audio writes to CWD, and os.chdir() is process-global.
         # We serialize synth calls to minimize concurrency hazards.
@@ -240,10 +244,10 @@ def create_default_tts(agent_root: Optional[Path] = None) -> CosyVoiceTTS:
         "모든 게 다 막 완벽하고 편안함을 느끼고 이렇다면은 더 잘못된 거라고 생각해요"
     )
 
-    output_dir = agent_root / "screenshots" / "tts_output"
-
+    # Allow CosyVoiceTTS to use TTS_OUTPUT_DIR from env, or default to screenshots/tts_output
+    # We do NOT pass output_dir explicitly unless we want to override env.
+    
     return CosyVoiceTTS(
         ref_audio_path=ref_audio_path,
         ref_text=ref_text if ref_audio_path else None,
-        output_dir=output_dir,
     )

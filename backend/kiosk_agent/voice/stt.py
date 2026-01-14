@@ -24,11 +24,22 @@ def _get_credentials():
         raise ValueError(
             "GOOGLE_APPLICATION_CREDENTIALS 환경변수에 서비스 계정 JSON 파일 경로를 설정해주세요."
         )
-    if not Path(credentials_path).exists():
-        raise FileNotFoundError(f"서비스 계정 파일을 찾을 수 없습니다: {credentials_path}")
+    
+    # Resolve relative path against project root
+    path_obj = Path(credentials_path)
+    if not path_obj.is_absolute():
+        project_root = Path(__file__).resolve().parents[3]
+        path_obj = project_root / path_obj
+        
+    if not path_obj.exists():
+        # Try original path as fallback
+        if Path(credentials_path).exists():
+            path_obj = Path(credentials_path)
+        else:
+            raise FileNotFoundError(f"서비스 계정 파일을 찾을 수 없습니다: {path_obj} (orig: {credentials_path})")
 
     credentials = service_account.Credentials.from_service_account_file(
-        credentials_path,
+        str(path_obj),
         scopes=["https://www.googleapis.com/auth/cloud-platform"]
     )
     credentials.refresh(Request())

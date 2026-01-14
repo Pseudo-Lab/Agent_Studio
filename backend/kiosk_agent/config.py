@@ -35,6 +35,9 @@ class ModelConfig:
     provider: Literal["chatgpt", "gemini", "local_vllm"] = field(
         default_factory=lambda: os.getenv("MODEL_PROVIDER", "gemini")
     )
+    output_schema: Literal["standard", "planning"] = field(
+        default_factory=lambda: os.getenv("MODEL_OUTPUT_SCHEMA", "standard")
+    )
     system_prompt: str = VLM_GEMINI_SYSTEM_PROMPT
     temperature: float = field(default_factory=lambda: float(os.getenv("MODEL_TEMPERATURE", "0.1")))
     top_p: float = field(default_factory=lambda: float(os.getenv("MODEL_TOP_P", "0.3")))

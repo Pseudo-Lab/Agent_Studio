@@ -10,7 +10,7 @@ from PIL import Image
 from ..config import ModelConfig
 from ..utils import get_logger
 from .base import BaseModelClient
-from ..prompts.schema import GUI_OUTPUT
+from ..prompts.schema import GUI_OUTPUT, GUI_OUTPUT_PLANNING
 
 logger = get_logger(__name__)
 
@@ -37,11 +37,14 @@ class GeminiClient(BaseModelClient):
         """
         types = self._types
         
+        output_schema = (
+            GUI_OUTPUT_PLANNING if self.config.output_schema == "planning" else GUI_OUTPUT
+        )
         config = types.GenerateContentConfig(
             thinking_config=types.ThinkingConfig(thinking_level="low"),
             system_instruction=self.config.system_prompt,
             response_mime_type="application/json",
-            response_json_schema=GUI_OUTPUT.model_json_schema(),
+            response_json_schema=output_schema.model_json_schema(),
         )
         
         contents = self._build_parts(instruction, image)

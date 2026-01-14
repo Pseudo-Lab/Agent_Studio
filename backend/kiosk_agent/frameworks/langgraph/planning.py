@@ -73,6 +73,16 @@ class PlanningMixin:
         Combines all planning steps into a single node for simpler graph.
         Uses Tavily as a tool internally rather than a separate node.
         """
+        existing_plan = state.get("plan") or []
+        if state.get("planning_complete") and existing_plan:
+            logger.info("[Planning] Skipping (existing plan)")
+            return {
+                "plan": existing_plan,
+                "plan_step_index": int(state.get("plan_step_index") or 0),
+                "planning_complete": True,
+                "status": "planning_skipped",
+            }
+
         instruction = state.get("instruction", "")
         logger.info(f"[Planning] Starting for: {instruction[:50]}...")
         

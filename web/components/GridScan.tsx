@@ -65,7 +65,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     vec3 color = vec3(0.0);
   float minT = 1e20;
   float gridScale = max(1e-5, uGridScale);
-    float fadeStrength = 2.0;
+    float fadeStrength = 0.5;
     vec2 gridUV = vec2(0.0);
 
   float hitIsY = 1.0;
@@ -435,7 +435,7 @@ export default function GridScan({
     const el = containerRef.current;
     if (!el) return;
     let leaveTimer: ReturnType<typeof setTimeout> | null = null;
-    
+
     const onMove = (e: MouseEvent) => {
       if (leaveTimer) {
         clearTimeout(leaveTimer);
@@ -446,19 +446,19 @@ export default function GridScan({
       const ny = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
       lookTarget.current.set(nx, ny);
     };
-    
+
     const onClick = () => {
       const nowSec = performance.now() / 1000;
       if (scanOnClick) pushScan(nowSec);
     };
-    
+
     const onEnter = () => {
       if (leaveTimer) {
         clearTimeout(leaveTimer);
         leaveTimer = null;
       }
     };
-    
+
     const onLeave = () => {
       if (leaveTimer) clearTimeout(leaveTimer);
       leaveTimer = setTimeout(
@@ -470,12 +470,12 @@ export default function GridScan({
         Math.max(0, snapBackDelay || 0)
       );
     };
-    
+
     el.addEventListener('mousemove', onMove);
     el.addEventListener('mouseenter', onEnter);
     if (scanOnClick) el.addEventListener('click', onClick);
     el.addEventListener('mouseleave', onLeave);
-    
+
     return () => {
       el.removeEventListener('mousemove', onMove);
       el.removeEventListener('mouseenter', onEnter);

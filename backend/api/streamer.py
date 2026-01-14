@@ -92,6 +92,10 @@ def interrupt_question(state: Dict[str, Any]) -> str:
 
 def extract_final_thought(state: Dict[str, Any]) -> str:
     """Extract final thought from state."""
+    if state.get("status") == "aborted":
+        return "사용자 요청으로 작업을 종료합니다."
+    if state.get("status") == "max_iterations":
+        return "사용자가 설정한 최대 턴 수에 도달해 종료합니다."
     history = state.get("history", [])
     if history:
         last_entry = history[-1]
@@ -143,7 +147,7 @@ class AgentStreamer:
         # Assign character for this session
         clear_session_character(thread_id)  # 새 세션이므로 기존 할당 초기화
         character = get_character_for_session(thread_id)
-        # NOTE: Frontend expects 'chef' key for backward compatibility
+        # NOTE: Frontend expects 'character' key
         character_info = {
             "id": character.id,
             "name": character.name,
@@ -204,7 +208,13 @@ class AgentStreamer:
                     
                     current_action = payload.get("action")
                     action_upper = (str(current_action) if current_action else "").upper()
-                    is_interrupt = bool(payload.get("interrupt")) or action_upper == "INTERRUPT"
+                    decision = str(payload.get("step_decision") or "").lower()
+                    is_abort = (
+                        action_upper == "ABORT"
+                        or (enable_planning and decision == "abort")
+                        or latest_state.get("status") == "aborted"
+                    )
+                    is_interrupt = False if is_abort else (bool(payload.get("interrupt")) or action_upper == "INTERRUPT")
                     has_result = latest_state.get("progress") is not None
                     ready = bool(is_interrupt or (latest_state.get("post_action_path") and has_result))
 
@@ -227,23 +237,10 @@ class AgentStreamer:
                             q.put(("plan_step", step_event))
                             logger.info(f"[Plan Mode] Step {snap['plan_step_index']}/{len(snap['plan'])} completed")
                         
-                        # TTS for thought (if enabled)
-                        if agent.tts and not is_interrupt and os.getenv("AGENT_TTS_THOUGHT", "0") in {"1", "true"}:
-                            try:
-                                audio_path = agent.tts.synthesize(
-                                    text=str(thought)[:320],
-                                    file_prefix=tts_file_prefix(thread_id, run_id),
-                                    ref_audio_override=character_ref_audio,
-                                    ref_text_override=character_ref_text,
-                                )
-                                q.put(("tts", {"audio_path": str(audio_path), "final_thought": thought}))
-                            except Exception as e:
-                                logger.warning(f"TTS failed: {e}")
-
                     # HITL check
                     is_needs_human = latest_state.get("status") == "needs_human"
                     if is_interrupt or is_needs_human:
-                        # TTS for question (with character voice)
+                        # TTS only for HITL question (with character voice)
                         if agent.tts:
                             try:
                                 q_text = interrupt_question(latest_state)
@@ -264,33 +261,23 @@ class AgentStreamer:
                             last_state=dict(latest_state),
                             last_iteration=iteration,
                         )
-                        q.put(("hitl", {"thread_id": thread_id, "chef": character_info}))
-                        q.put(("done", {"status": "waiting_human", "final_action": final_action, "chef": character_info}))
+                        q.put(("hitl", {"thread_id": thread_id, "character": character_info}))
+                        q.put(("done", {"status": "waiting_human", "final_action": final_action, "character": character_info}))
                         return
 
                 final_thought = extract_final_thought(latest_state)
-                # Apply character completion style
-                styled_thought = character.get_completion_message(final_thought)
-
-                # TTS for completion (with character voice)
-                if agent.tts and latest_state.get("status") == "task_complete":
-                    try:
-                        audio_path = agent.tts.synthesize(
-                            text=styled_thought,
-                            file_prefix=tts_file_prefix(thread_id, run_id),
-                            ref_audio_override=character_ref_audio,
-                            ref_text_override=character_ref_text,
-                        )
-                        q.put(("tts", {"audio_path": str(audio_path), "final_thought": styled_thought}))
-                    except Exception as e:
-                        logger.warning(f"TTS (completion) failed: {e}")
+                # Apply character completion style (use quit tone for abort)
+                if latest_state.get("status") == "aborted":
+                    styled_thought = f"{final_thought} {character.get_quit_message()}"
+                else:
+                    styled_thought = character.get_completion_message(final_thought)
 
                 self._sessions.update(
                     thread_id,
                     last_state=dict(latest_state),
                     last_iteration=int(latest_state.get("iteration") or 0),
                 )
-                q.put(("done", {"status": "completed", "final_action": final_action, "final_thought": styled_thought, "chef": character_info}))
+                q.put(("done", {"status": "completed", "final_action": final_action, "final_thought": styled_thought, "character": character_info}))
                 
             except Exception as e:
                 tb = traceback.format_exc()
@@ -306,7 +293,7 @@ class AgentStreamer:
                 "threadId": thread_id,
                 "runId": run_id,
                 "timestamp": int(time.time() * 1000),
-                "chef": character_info,  # Frontend expects 'chef' key
+                "character": character_info,  # Frontend expects 'character' key
                 "planningEnabled": enable_planning,
             })
             await asyncio.sleep(0)
@@ -352,9 +339,9 @@ class AgentStreamer:
                                 "status": payload.get("status"),
                                 "finalAction": payload.get("final_action"),
                                 "finalThought": payload.get("final_thought"),
-                                "chef": payload.get("chef") or character_info,
+                                "character": payload.get("character") or character_info,
                             },
-                            "chef": payload.get("chef") or character_info,
+                            "character": payload.get("character") or character_info,
                             "timestamp": int(time.time() * 1000),
                         })
                         return
@@ -386,9 +373,10 @@ class AgentStreamer:
 
         previous_state = dict(session.get("last_state") or {})
         model_id = session.get("model") or "gemini-flash"
+        enable_planning = bool(session.get("enable_planning", False))
         last_iteration = int(session.get("last_iteration") or 0)
 
-        agent = self._get_agent(model_id)
+        agent = self._get_agent(model_id, enable_planning)
         
         # Get character for this session (same character as start)
         resp_character = get_character_for_session(req.thread_id)
@@ -401,52 +389,6 @@ class AgentStreamer:
         resp_character_ref_audio = get_character_ref_audio_path(resp_character)
         resp_character_ref_text = resp_character.ref_text
 
-        # Check quit commands
-        user_resp = (req.response or "").strip().lower()
-        quit_commands = {"quit", "exit", "finish", "종료", "끝", "나가기", "취소"}
-        
-        if user_resp in quit_commands:
-            self._sessions.update(req.thread_id, waiting_human=False)
-            run_id = str(uuid.uuid4())
-            final_thought = resp_character.get_quit_message()
-
-            async def stream_quit():
-                yield sse_encode({
-                    "type": "RUN_STARTED",
-                    "threadId": req.thread_id,
-                    "runId": run_id,
-                    "timestamp": int(time.time() * 1000),
-                    "chef": resp_character_info,
-                })
-                
-                # TTS for quit (with character voice)
-                if agent.tts:
-                    try:
-                        audio_path = agent.tts.synthesize(
-                            text=final_thought,
-                            file_prefix=tts_file_prefix(req.thread_id, run_id),
-                            ref_audio_override=resp_character_ref_audio,
-                            ref_text_override=resp_character_ref_text,
-                        )
-                        yield sse_encode({
-                            "type": "CUSTOM",
-                            "name": "tts_generated",
-                            "value": {"audio_path": str(audio_path), "final_thought": final_thought},
-                        })
-                    except Exception:
-                        pass
-
-                yield sse_encode({
-                    "type": "RUN_FINISHED",
-                    "threadId": req.thread_id,
-                    "runId": run_id,
-                    "result": {"status": "cancelled", "finalThought": final_thought, "chef": resp_character_info},
-                    "chef": resp_character_info,
-                    "timestamp": int(time.time() * 1000),
-                })
-
-            return StreamingResponse(stream_quit(), media_type="text/event-stream")
-
         # Build combined instruction
         question = interrupt_question(previous_state)
         combined = f"{previous_state.get('instruction', '')}\n[추가 정보]: {question} -> {req.response}"
@@ -457,6 +399,8 @@ class AgentStreamer:
         initial_state["payload"] = {}
         initial_state["model_action"] = None
         initial_state["thought"] = None
+        if enable_planning:
+            initial_state["original_instruction"] = combined
 
         graph, _ = agent.prepare_workflow(combined, previous_state=initial_state)
         self._sessions.touch(req.thread_id)
@@ -486,7 +430,13 @@ class AgentStreamer:
                     
                     current_action = payload.get("action")
                     action_upper = (str(current_action) if current_action else "").upper()
-                    is_interrupt = bool(payload.get("interrupt")) or action_upper == "INTERRUPT"
+                    decision = str(payload.get("step_decision") or "").lower()
+                    is_abort = (
+                        action_upper == "ABORT"
+                        or (enable_planning and decision == "abort")
+                        or latest_state.get("status") == "aborted"
+                    )
+                    is_interrupt = False if is_abort else (bool(payload.get("interrupt")) or action_upper == "INTERRUPT")
                     has_result = latest_state.get("progress") is not None
                     ready = bool(is_interrupt or (latest_state.get("post_action_path") and has_result))
 
@@ -518,24 +468,15 @@ class AgentStreamer:
                             last_state=dict(latest_state),
                             last_iteration=iteration,
                         )
-                        q.put(("hitl", {"thread_id": req.thread_id, "chef": resp_character_info}))
-                        q.put(("done", {"status": "waiting_human", "final_action": final_action, "chef": resp_character_info}))
+                        q.put(("hitl", {"thread_id": req.thread_id, "character": resp_character_info}))
+                        q.put(("done", {"status": "waiting_human", "final_action": final_action, "character": resp_character_info}))
                         return
 
                 final_thought = extract_final_thought(latest_state)
-                styled_thought = resp_character.get_completion_message(final_thought)
-
-                if agent.tts and latest_state.get("status") == "task_complete":
-                    try:
-                        audio_path = agent.tts.synthesize(
-                            text=styled_thought,
-                            file_prefix=tts_file_prefix(req.thread_id, run_id),
-                            ref_audio_override=resp_character_ref_audio,
-                            ref_text_override=resp_character_ref_text,
-                        )
-                        q.put(("tts", {"audio_path": str(audio_path), "final_thought": styled_thought}))
-                    except Exception:
-                        pass
+                if latest_state.get("status") == "aborted":
+                    styled_thought = f"{final_thought} {resp_character.get_quit_message()}"
+                else:
+                    styled_thought = resp_character.get_completion_message(final_thought)
 
                 self._sessions.update(
                     req.thread_id,
@@ -543,7 +484,7 @@ class AgentStreamer:
                     last_state=dict(latest_state),
                     last_iteration=int(latest_state.get("iteration") or 0),
                 )
-                q.put(("done", {"status": "completed", "final_action": final_action, "final_thought": styled_thought, "chef": resp_character_info}))
+                q.put(("done", {"status": "completed", "final_action": final_action, "final_thought": styled_thought, "character": resp_character_info}))
 
             except Exception as e:
                 tb = traceback.format_exc()
@@ -558,7 +499,7 @@ class AgentStreamer:
                 "threadId": req.thread_id,
                 "runId": run_id,
                 "timestamp": int(time.time() * 1000),
-                "chef": resp_character_info,
+                "character": resp_character_info,
             })
             await asyncio.sleep(0)
 
@@ -595,9 +536,9 @@ class AgentStreamer:
                                 "status": payload.get("status"),
                                 "finalAction": payload.get("final_action"),
                                 "finalThought": payload.get("final_thought"),
-                                "chef": payload.get("chef") or resp_character_info,
+                                "character": payload.get("character") or resp_character_info,
                             },
-                            "chef": payload.get("chef") or resp_character_info,
+                            "character": payload.get("character") or resp_character_info,
                             "timestamp": int(time.time() * 1000),
                         })
                         return

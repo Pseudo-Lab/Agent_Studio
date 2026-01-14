@@ -19,7 +19,7 @@ class InterruptInfo(BaseModel):
 class GUI_OUTPUT(BaseModel):
     """Schema for GUI action output from VLM."""
     thought: str
-    action: Literal["CLICK", "LONG_CLICK", "SWIPE", "INPUT", "BACK", "HOME", "INTERRUPT"]
+    action: Literal["CLICK", "LONG_CLICK", "SWIPE", "INPUT", "BACK", "HOME", "INTERRUPT", "FINISH", "ABORT"]
     # NOTE: Always include box_2d (use [0,0,0,0] when not applicable).
     box_2d: List[float] = Field(
         min_length=4, 
@@ -31,3 +31,21 @@ class GUI_OUTPUT(BaseModel):
         description="Text to input when action == INPUT (non-empty string). Otherwise null."
     )
     interrupt: Optional[InterruptInfo] = None
+
+
+class GUI_OUTPUT_PLANNING(BaseModel):
+    """Schema for GUI action output from VLM (planning mode)."""
+    thought: str
+    action: Literal["CLICK", "LONG_CLICK", "SWIPE", "INPUT", "BACK", "HOME", "INTERRUPT", "FINISH", "ABORT"]
+    box_2d: List[float] = Field(
+        min_length=4,
+        max_length=4,
+        description="[ymin, xmin, ymax, xmax], normalized 0-1000",
+    )
+    value: Optional[str] = Field(
+        description="Text to input when action == INPUT (non-empty string). Otherwise null."
+    )
+    interrupt: Optional[InterruptInfo] = None
+    step_decision: Literal["repeat", "advance", "abort"] = Field(
+        description="Planning step decision for the current to-do.",
+    )
