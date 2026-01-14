@@ -210,21 +210,36 @@ export function ChatInputBar({
 
           {/* Planning Toggle & Model Selector - Inside Input */}
           <div className="absolute right-3 flex items-center gap-1">
-            {/* Planning Mode Toggle - Cursor Style */}
-            <button
-              type="button"
-              onClick={() => setEnablePlanning(!enablePlanning)}
-              disabled={isRunning}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-bold transition-all uppercase tracking-wider ${
-                enablePlanning
-                  ? "bg-amber-400/90 text-amber-950 border border-amber-400/50"
-                  : "text-gray-500 hover:text-gray-300 hover:bg-white/[0.05]"
-              } disabled:opacity-50 disabled:cursor-not-allowed`}
-              title={enablePlanning ? "Planning Mode ON - 웹 검색 및 태스크 분해 활성화" : "Planning Mode OFF"}
-            >
-              <SlidersHorizontal className={`w-3.5 h-3.5 ${enablePlanning ? "text-amber-950" : ""}`} />
-              <span className="hidden sm:inline">Plan</span>
-            </button>
+            {/* Planning Mode Toggle with Tooltip */}
+            <div className="relative group">
+              <button
+                type="button"
+                onClick={() => setEnablePlanning(!enablePlanning)}
+                disabled={isRunning}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-bold transition-all uppercase tracking-wider ${
+                  enablePlanning
+                    ? "bg-amber-400/90 text-amber-950 border border-amber-400/50"
+                    : "text-gray-500 hover:text-gray-300 hover:bg-white/[0.05]"
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
+              >
+                <SlidersHorizontal className={`w-3.5 h-3.5 ${enablePlanning ? "text-amber-950" : ""}`} />
+                <span className="hidden sm:inline">Plan</span>
+              </button>
+              
+              {/* Tooltip */}
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-[#1c1c22] border border-white/10 rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none z-50 w-56">
+                <div className="text-xs font-semibold text-white mb-1">
+                  {enablePlanning ? "Planning Mode ON" : "Planning Mode"}
+                </div>
+                <div className="text-[10px] text-gray-400 leading-relaxed">
+                  {enablePlanning 
+                    ? "모르는 개념을 웹에서 검색하고, 단계별 계획을 세워 실행합니다."
+                    : "켜면 복잡한 요청을 자동으로 분석하고 계획을 세웁니다."}
+                </div>
+                {/* Arrow */}
+                <div className="absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 bg-[#1c1c22] border-r border-b border-white/10 rotate-45 -mt-1" />
+              </div>
+            </div>
 
             {/* Model Selector */}
             <div className="relative">
