@@ -25,9 +25,10 @@ import InterruptChoiceCard from '@/components/InterruptChoiceCard';
 import TargetChip from '@/components/TargetChip';
 import ShinyText from '@/components/ShinyText';
 
-import type { AGUIEvent, ChatMessage, CharacterInfo, ThinkingStep } from './types';
+import type { AGUIEvent, ChatMessage, CharacterInfo, ThinkingStep, PlanningState } from './types';
 import { ResultAudioButton } from './components/ResultAudioButton';
 import { ChatInputBar } from './components/ChatInputBar';
+import { PlanningPanel } from './components/PlanningPanel';
 
 const actionColors: Record<string, string> = {
   CLICK: 'text-blue-400',
@@ -74,6 +75,8 @@ export default function Home() {
   
   // Planning Mode
   const [enablePlanning, setEnablePlanning] = useState(false);
+  const [planningState, setPlanningState] = useState<PlanningState | null>(null);
+  const [showPlanningPanel, setShowPlanningPanel] = useState(false);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -369,6 +372,27 @@ export default function Home() {
         });
       }
     }
+
+    // Planning Mode update
+    if (event.type === 'CUSTOM' && event.name === 'planning_update') {
+      const value = (event as any).value;
+      if (value) {
+        console.log('[Planning] Update received:', value.status);
+        setPlanningState({
+          phase: "planning",
+          status: value.status || "",
+          unknownEntities: value.unknown_entities || [],
+          searchContext: value.search_context || "",
+          plan: value.plan || [],
+        });
+        setShowPlanningPanel(true);
+        
+        // Hide planning panel after completion (with delay)
+        if (value.status === "planning_complete") {
+          setTimeout(() => setShowPlanningPanel(false), 3000);
+        }
+      }
+    }
   }, [addMessage, addThinkingStep, finalizeThinking, activeInterruptId]);
 
   // Quick submit for HITL multiple-choice options
@@ -406,9 +430,11 @@ export default function Home() {
       return;
     }
 
-    // 새 작업 시작 - interrupt 기록 초기화, 셰프 초기화
+    // 새 작업 시작 - interrupt 기록 초기화, 셰프 초기화, Planning 초기화
     seenInterruptsRef.current.clear();
     setCurrentCharacter(null);  // 새 세션에서 새 캐릭터 할당을 위해 초기화
+    setPlanningState(null);  // Planning 상태 초기화
+    setShowPlanningPanel(enablePlanning);  // Planning 모드면 패널 표시
     setIsRunning(true);
     setCurrentStep(0);
     const newThreadId = crypto.randomUUID();
@@ -905,6 +931,12 @@ export default function Home() {
               <span className="text-[13px] font-medium tracking-tight">Initializing agent...</span>
             </div>
           )}
+
+          {/* Planning Mode Panel */}
+          <PlanningPanel 
+            planningState={planningState} 
+            isVisible={showPlanningPanel && enablePlanning} 
+          />
 
           <div ref={chatEndRef} />
         </div>

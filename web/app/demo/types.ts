@@ -31,6 +31,14 @@ export interface ChatMessage {
   character?: CharacterInfo | null; // Character for this message
 }
 
+export interface PlanningState {
+  phase: "planning";
+  status: "detecting_unknown" | "web_search_complete" | "web_search_skipped" | "planning_complete" | "";
+  unknownEntities: string[];
+  searchContext: string;
+  plan: string[];
+}
+
 export interface AGUIEvent {
   type: string;
   snapshot?: Record<string, any>;
@@ -47,5 +55,7 @@ export interface AGUIEvent {
   run_id?: string;
   // Character info (backend sends as 'chef' for compatibility)
   chef?: CharacterInfo;
+  // Planning mode enabled flag
+  planningEnabled?: boolean;
 }
 

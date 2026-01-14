@@ -181,6 +181,19 @@ class AgentStreamer:
                     if isinstance(event, dict):
                         latest_state.update(event)
 
+                    # Planning phase events (AG-UI CUSTOM)
+                    status = latest_state.get("status", "")
+                    if status in ["detecting_unknown", "web_search_complete", "web_search_skipped", "planning_complete"]:
+                        planning_event = {
+                            "phase": "planning",
+                            "status": status,
+                            "unknown_entities": latest_state.get("unknown_entities", []),
+                            "search_context": latest_state.get("search_context", "")[:500] if latest_state.get("search_context") else "",
+                            "plan": latest_state.get("plan", []),
+                        }
+                        q.put(("planning", planning_event))
+                        logger.info(f"[Planning] Status: {status}")
+
                     iteration = int(latest_state.get("iteration") or 0)
                     thought = latest_state.get("thought")
                     payload = latest_state.get("payload") or {}
@@ -299,6 +312,8 @@ class AgentStreamer:
 
                     if kind == "snapshot":
                         yield sse_encode({"type": "STATE_SNAPSHOT", "snapshot": payload})
+                    elif kind == "planning":
+                        yield sse_encode({"type": "CUSTOM", "name": "planning_update", "value": payload})
                     elif kind == "hitl":
                         yield sse_encode({"type": "CUSTOM", "name": "waiting_human", "value": payload})
                     elif kind == "tts":

@@ -1,4 +1,4 @@
-"""Prompt templates for LangGraph Kiosk Agent."""
+"""VLM (Vision-Language Model) prompt templates."""
 
 # User prompt template for VLM reasoning
 USER_PROMPT_TEMPLATE = """
