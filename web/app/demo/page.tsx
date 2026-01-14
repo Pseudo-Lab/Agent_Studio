@@ -584,6 +584,17 @@ export default function Home() {
       <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full pt-2">
         {/* Chat Area */}
         <div className="flex-1 overflow-y-auto px-6 py-10 space-y-10 scrollbar-hide">
+          {/* Planning Mode Panel (sticky top) */}
+          {enablePlanning && showPlanningPanel && (
+            <div className="sticky top-0 z-30 -mx-6 px-6 pt-2 pb-3 bg-gradient-to-b from-[#111114] via-[#111114]/95 to-transparent backdrop-blur-sm">
+              <PlanningPanel
+                planningState={planningState}
+                isVisible={true}
+                onClose={() => setShowPlanningPanel(false)}
+              />
+            </div>
+          )}
+
           {messages.length === 0 && (
             <div className="h-full flex flex-col items-center justify-center text-center px-4 animate-in fade-in duration-700">
               <div className="w-20 h-20 mb-6">
@@ -943,13 +954,6 @@ export default function Home() {
               <span className="text-[13px] font-medium tracking-tight">Initializing agent...</span>
             </div>
           )}
-
-          {/* Planning Mode Panel */}
-          <PlanningPanel 
-            planningState={planningState} 
-            isVisible={showPlanningPanel && enablePlanning} 
-            onClose={() => setShowPlanningPanel(false)}
-          />
 
           <div ref={chatEndRef} />
         </div>

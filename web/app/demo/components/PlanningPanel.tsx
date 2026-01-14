@@ -62,7 +62,7 @@ export function PlanningPanel({ planningState, isVisible, onClose }: Props) {
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: -20, scale: 0.95 }}
         transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
-        className="mx-6 mb-4 p-4 rounded-2xl border border-white/[0.10] bg-[#141416]/80 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.35)] relative overflow-hidden"
+        className="w-full mb-4 p-4 rounded-2xl border border-white/[0.10] bg-[#141416]/80 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.35)] relative overflow-hidden"
       >
         {/* top accent */}
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-400/35 to-transparent" />
