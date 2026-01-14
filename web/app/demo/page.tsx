@@ -588,44 +588,30 @@ export default function Home() {
         {/* Chat Area */}
         <div className="flex-1 overflow-y-auto px-6 py-10 space-y-10 scrollbar-hide">
           {messages.length === 0 && (
-            <div className="h-full flex flex-col items-center justify-center text-center px-4">
+            <div className="h-full flex flex-col items-center justify-center text-center px-4 animate-in fade-in duration-700">
+              <div className="w-20 h-20 mb-6">
+                <img src="/images/gemini-logo.png" alt="Gemini" className="w-full h-full object-contain" />
+              </div>
+              <h2 className="text-3xl font-bold text-white mb-3 tracking-tight">키오스크 에이전트</h2>
+              <p className="text-gray-400 max-w-sm leading-relaxed mb-4">지시 사항을 입력하면 에이전트가 키오스크를 제어하여 주문을 도와드립니다.</p>
               {/* Time-based Greeting */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
-                className="mb-12"
-              >
-                <h1 className="text-4xl sm:text-5xl font-semibold text-white tracking-tight">
-                  <span className="mr-3">{greeting.emoji}</span>
-                  <span className="bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
-                    {greeting.text},
-                  </span>
-                  <span className="text-amber-400/90 ml-2">KDB</span>
-                  <span className="text-white">님</span>
-                </h1>
-              </motion.div>
-
-              {/* Quick Actions */}
-              <motion.div 
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.3, ease: [0.23, 1, 0.32, 1] }}
-                className="flex flex-wrap gap-2.5 justify-center max-w-2xl"
-              >
-                {quickActions.map((a, i) => (
-                  <motion.button
+              <p className="text-lg text-gray-300 mb-10">
+                <span className="mr-1">{greeting.emoji}</span>
+                <span>{greeting.text}, </span>
+                <span className="text-amber-400 font-medium">KDB</span>
+                <span>님</span>
+              </p>
+              <div className="flex flex-wrap gap-2.5 justify-center">
+                {quickActions.map((a) => (
+                  <button
                     key={a.text}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.4, delay: 0.4 + i * 0.1 }}
                     onClick={() => setInputValue(a.text)}
-                    className="px-5 py-2.5 rounded-2xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.08] hover:border-white/[0.15] text-sm text-gray-400 hover:text-white transition-all duration-300"
+                    className="px-5 py-2.5 rounded-2xl bg-white/[0.05] hover:bg-white/[0.12] border border-white/[0.15] text-sm text-gray-300 hover:text-white transition-all duration-300"
                   >
                     {a.emoji} {a.text}
-                  </motion.button>
+                  </button>
                 ))}
-              </motion.div>
+              </div>
             </div>
           )}
 
