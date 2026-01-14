@@ -4,18 +4,6 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Loader2,
-  Mic,
-  Square,
-  AlertCircle,
-  ChevronDown,
-  ChevronUp,
-  Terminal,
-  CheckCircle2,
-  Copy,
-  ThumbsUp,
-  ThumbsDown,
-  RotateCcw,
-  ArrowUp,
 } from 'lucide-react';
 
 import Header from '@/components/Header';
@@ -26,10 +14,10 @@ import TargetChip from '@/components/TargetChip';
 import ShinyText from '@/components/ShinyText';
 
 import type { AGUIEvent, ChatMessage, CharacterInfo, ThinkingStep, PlanningState } from './types';
-import { ResultAudioButton } from './components/ResultAudioButton';
 import { ChatInputBar } from './components/ChatInputBar';
-import { PlanningPanel } from './components/PlanningPanel';
 import { ThinkingBlock } from './components/ThinkingBlock';
+import { WelcomeScreen } from './components/WelcomeScreen';
+import { ResultMessage } from './components/ResultMessage';
 
 const actionColors: Record<string, string> = {
   CLICK: 'text-blue-400',
@@ -597,28 +585,11 @@ export default function Home() {
         <div className="flex-1 overflow-y-auto px-6 py-10 scrollbar-hide">
           <div className="space-y-10">
             {messages.length === 0 && (
-              <div className="h-full flex flex-col items-center justify-center text-center px-4 animate-in fade-in duration-700">
-                <div className="w-20 h-20 mb-6">
-                  <img src="/images/gemini-logo.png" alt="Gemini" className="w-full h-full object-contain" />
-                </div>
-                <h2 className="text-3xl font-bold text-white mb-3 tracking-tight">키오스크 에이전트</h2>
-                <p className="text-gray-400 mb-10">에이전트가 키오스크를 제어하여 주문을 도와드립니다.</p>
-                <div className="flex flex-wrap gap-2.5 justify-center">
-                  {quickActions.map((a) => (
-                    <button
-                      key={a.text}
-                      onClick={() => setInputValue(a.text)}
-                      className="px-5 py-2.5 rounded-2xl bg-white/[0.05] hover:bg-white/[0.12] border border-white/[0.15] text-sm text-gray-300 hover:text-white transition-all duration-300"
-                    >
-                      {a.emoji} {a.text}
-                    </button>
-                  ))}
-                </div>
-                {/* Time-based Greeting */}
-                <p className="mt-12 text-[13px] text-gray-500">
-                  {greeting.emoji} {greeting.text}. 무엇을 주문해 드릴까요?
-                </p>
-              </div>
+              <WelcomeScreen
+                quickActions={quickActions}
+                greeting={greeting}
+                onQuickAction={setInputValue}
+              />
             )}
 
             {/* Message List */}
@@ -670,135 +641,36 @@ export default function Home() {
                     />
                   )}
 
-                  {/* Result Message - HITL Card Style (동일한 스타일) */}
+                  {/* Result Message - extracted component */}
                   {msg.type === 'result' && (
-                    <div className="flex items-start gap-5 my-10 pl-1">
-                      <div className="flex-1">
-                        <div className="relative">
-                          {/* Glow */}
-                          <div className="absolute -inset-1.5 rounded-[28px] bg-gradient-to-r from-emerald-500/18 via-emerald-500/8 to-emerald-500/10 blur-xl opacity-60" />
+                    <ResultMessage
+                      msg={msg}
+                      copiedMessageId={copiedMessageId}
+                      isRunning={isRunning}
+                      onRetry={() => {
+                        const idx = messages.findIndex(m => m.id === msg.id);
+                        const prompt = idx >= 0
+                          ? [...messages].slice(0, idx).reverse().find(m => m.type === 'user')?.content
+                          : undefined;
+                        if (!prompt || isRunning) return;
 
-                          {/* Card - HITL과 동일한 스타일 */}
-                          <div className="relative overflow-hidden rounded-[28px] border border-emerald-500/14 bg-[#0f0f12]/55 backdrop-blur-xl shadow-[0_0_0_1px_rgba(255,255,255,0.04),0_20px_60px_rgba(0,0,0,0.55)]">
-                            {/* Subtle gradient wash */}
-                            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-transparent to-transparent" />
-                            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent" />
-                            
-                            <div className="relative p-5">
-                              <div className="flex items-center gap-4">
-                                {/* Character Avatar + Nickname */}
-                                {msg.character?.imagePath && (
-                                  <div className="flex flex-col items-center flex-shrink-0 w-16">
-                                    <div className="w-14 h-14 mb-1.5">
-                                      <img 
-                                        src={msg.character.imagePath} 
-                                        alt={msg.character.nickname} 
-                                        className="w-full h-full object-cover rounded-full border-2 border-emerald-500/50 shadow-[0_0_16px_rgba(52,211,153,0.25)]" 
-                                      />
-                                    </div>
-                                    <span className="text-[10px] font-bold text-emerald-400 text-center">
-                                      {msg.character.nickname}
-                                    </span>
-                                  </div>
-                                )}
-
-                                {/* Content + TTS Button */}
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-3">
-                                    <p className="flex-1 text-[15px] leading-relaxed font-semibold text-emerald-50/90 break-words">
-                                      {msg.content}
-                                    </p>
-                                    {/* TTS 버튼 - HITL과 동일한 스타일 */}
-                                    {msg.audioPath && (
-                                      <ResultAudioButton audioPath={msg.audioPath} showLabel />
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                              
-                              {/* Action bar */}
-                              <div className="flex items-center gap-2 mt-4 pt-3 border-t border-white/5">
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    const idx = messages.findIndex(m => m.id === msg.id);
-                                    const prompt =
-                                      idx >= 0
-                                        ? [...messages]
-                                            .slice(0, idx)
-                                            .reverse()
-                                            .find(m => m.type === 'user')?.content
-                                        : undefined;
-                                    if (!prompt || isRunning) return;
-
-                                    seenInterruptsRef.current.clear();
-                                    setIsRunning(true);
-                                    setRequiresHumanInput(false);
-                                    setActiveInterruptId(null);
-                                    setCurrentStep(0);
-                                    const newThreadId = crypto.randomUUID();
-                                    setThreadId(newThreadId);
-                                    startStream('/api/agent/start', {
-                                      instruction: prompt,
-                                      thread_id: newThreadId,
-                                      model: selectedModel,
-                                      enable_planning: enablePlanning,
-                                    });
-                                  }}
-                                  disabled={isRunning}
-                                  className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all text-xs text-gray-400 hover:text-gray-200 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
-                                  title="재시도"
-                                >
-                                  <RotateCcw className="w-3.5 h-3.5" />
-                                  <span>재시도</span>
-                                </button>
-
-                                <button
-                                  type="button"
-                                  onClick={() => setMessageFeedback(msg.id, msg.feedback === 'up' ? null : 'up')}
-                                  className={[
-                                    "p-2 rounded-xl transition-colors",
-                                    msg.feedback === 'up'
-                                      ? "bg-emerald-500/20 text-emerald-300"
-                                      : "bg-white/5 hover:bg-white/10 text-gray-500 hover:text-gray-300",
-                                  ].join(" ")}
-                                  title="따봉"
-                                >
-                                  <ThumbsUp className="w-3.5 h-3.5" />
-                                </button>
-
-                                <button
-                                  type="button"
-                                  onClick={() => setMessageFeedback(msg.id, msg.feedback === 'down' ? null : 'down')}
-                                  className={[
-                                    "p-2 rounded-xl transition-colors",
-                                    msg.feedback === 'down'
-                                      ? "bg-rose-500/20 text-rose-300"
-                                      : "bg-white/5 hover:bg-white/10 text-gray-500 hover:text-gray-300",
-                                  ].join(" ")}
-                                  title="싫어요"
-                                >
-                                  <ThumbsDown className="w-3.5 h-3.5" />
-                                </button>
-
-                                <button
-                                  type="button"
-                                  onClick={() => copyMessage(msg.id, msg.content)}
-                                  className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-500 hover:text-gray-300 transition-colors"
-                                  title="복사"
-                                >
-                                  {copiedMessageId === msg.id ? (
-                                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-300" />
-                                  ) : (
-                                    <Copy className="w-3.5 h-3.5" />
-                                  )}
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                        seenInterruptsRef.current.clear();
+                        setIsRunning(true);
+                        setRequiresHumanInput(false);
+                        setActiveInterruptId(null);
+                        setCurrentStep(0);
+                        const newThreadId = crypto.randomUUID();
+                        setThreadId(newThreadId);
+                        startStream('/api/agent/start', {
+                          instruction: prompt,
+                          thread_id: newThreadId,
+                          model: selectedModel,
+                          enable_planning: enablePlanning,
+                        });
+                      }}
+                      onFeedback={(fb) => setMessageFeedback(msg.id, fb)}
+                      onCopy={() => copyMessage(msg.id, msg.content)}
+                    />
                   )}
 
                   {/* Interrupt - Elegant Notice Style with Character */}
