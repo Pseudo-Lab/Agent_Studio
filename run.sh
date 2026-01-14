@@ -127,6 +127,12 @@ cleanup() {
     if [ ! -z "$FRONTEND_PID" ]; then
         kill $FRONTEND_PID 2>/dev/null && print_check "Frontend stopped" || true
     fi
+
+    # Safety net: ensure ports are freed (pipeline/PID mismatches or child processes)
+    if command -v lsof &> /dev/null; then
+        lsof -ti:8080 2>/dev/null | xargs kill -9 2>/dev/null || true
+        lsof -ti:3000 2>/dev/null | xargs kill -9 2>/dev/null || true
+    fi
     
     echo ""
     echo -e "  ${ORANGE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
@@ -231,17 +237,17 @@ main() {
     
     # Backend 실행
     cd "$PROJECT_ROOT/backend"
-    python -m uvicorn api.main:app --host 0.0.0.0 --port 8080 2>&1 | while IFS= read -r line; do
+    python -m uvicorn api.main:app --host 0.0.0.0 --port 8080 > >(while IFS= read -r line; do
         echo -e "  ${ORANGE}│${NC} ${GRAY}[API]${NC} $line"
-    done &
+    done) 2>&1 &
     BACKEND_PID=$!
     sleep 1.5
     
     # Frontend 실행
     cd "$PROJECT_ROOT/web"
-    npm run dev 2>&1 | while IFS= read -r line; do
+    npm run dev > >(while IFS= read -r line; do
         echo -e "  ${BLUE}│${NC} ${GRAY}[WEB]${NC} $line"
-    done &
+    done) 2>&1 &
     FRONTEND_PID=$!
     
     echo ""
