@@ -593,13 +593,8 @@ export default function Home() {
                 <img src="/images/gemini-logo.png" alt="Gemini" className="w-full h-full object-contain" />
               </div>
               <h2 className="text-3xl font-bold text-white mb-3 tracking-tight">키오스크 에이전트</h2>
-              <p className="text-gray-400 max-w-sm leading-relaxed mb-4">지시 사항을 입력하면 에이전트가 키오스크를 제어하여 주문을 도와드립니다.</p>
-              {/* Time-based Greeting */}
-              <p className="text-lg text-gray-300 mb-10">
-                <span className="mr-1">{greeting.emoji}</span>
-                <span>{greeting.text}, </span>
-                <span className="text-amber-400 font-medium">KDB</span>
-                <span>님</span>
+              <p className="text-gray-400 max-w-sm leading-relaxed mb-10">
+                지시 사항을 입력하면 에이전트가 키오스크를 제어하여 주문을 도와드립니다.
               </p>
               <div className="flex flex-wrap gap-2.5 justify-center">
                 {quickActions.map((a) => (
@@ -611,6 +606,13 @@ export default function Home() {
                     {a.emoji} {a.text}
                   </button>
                 ))}
+              </div>
+              {/* Time-based Greeting - subtle footer style */}
+              <div className="mt-12 flex items-center gap-2 text-[13px] text-gray-500">
+                <span>{greeting.emoji}</span>
+                <span>{greeting.text},</span>
+                <span className="text-gray-400">KDB</span>
+                <span>님</span>
               </div>
             </div>
           )}
