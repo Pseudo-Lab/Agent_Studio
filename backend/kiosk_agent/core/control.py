@@ -15,6 +15,88 @@ logger = get_logger(__name__)
 class ADBController:
     """Light wrapper around adb shell gestures."""
 
+    # Dubeolsik (2-set) Hangul keyboard mapping.
+    # Used as a fallback when `adb shell input text` cannot inject Hangul directly
+    # (some devices crash with InputShellCommand NPE for non-ASCII chars).
+    _CHO_KEYS = [
+        "r",  # ㄱ
+        "R",  # ㄲ
+        "s",  # ㄴ
+        "e",  # ㄷ
+        "E",  # ㄸ
+        "f",  # ㄹ
+        "a",  # ㅁ
+        "q",  # ㅂ
+        "Q",  # ㅃ
+        "t",  # ㅅ
+        "T",  # ㅆ
+        "d",  # ㅇ
+        "w",  # ㅈ
+        "W",  # ㅉ
+        "c",  # ㅊ
+        "z",  # ㅋ
+        "x",  # ㅌ
+        "v",  # ㅍ
+        "g",  # ㅎ
+    ]
+    _JUNG_KEYS = [
+        "k",   # ㅏ
+        "o",   # ㅐ
+        "i",   # ㅑ
+        "O",   # ㅒ
+        "j",   # ㅓ
+        "p",   # ㅔ
+        "u",   # ㅕ
+        "P",   # ㅖ
+        "h",   # ㅗ
+        "hk",  # ㅘ
+        "ho",  # ㅙ
+        "hl",  # ㅚ
+        "y",   # ㅛ
+        "n",   # ㅜ
+        "nj",  # ㅝ
+        "np",  # ㅞ
+        "nl",  # ㅟ
+        "b",   # ㅠ
+        "m",   # ㅡ
+        "ml",  # ㅢ
+        "l",   # ㅣ
+    ]
+    _JONG_KEYS = [
+        "",    # (none)
+        "r",   # ㄱ
+        "R",   # ㄲ
+        "rt",  # ㄳ
+        "s",   # ㄴ
+        "sw",  # ㄵ
+        "sg",  # ㄶ
+        "e",   # ㄷ
+        "f",   # ㄹ
+        "fr",  # ㄺ
+        "fa",  # ㄻ
+        "fq",  # ㄼ
+        "ft",  # ㄽ
+        "fx",  # ㄾ
+        "fv",  # ㄿ
+        "fg",  # ㅀ
+        "a",   # ㅁ
+        "q",   # ㅂ
+        "qt",  # ㅄ
+        "t",   # ㅅ
+        "T",   # ㅆ
+        "d",   # ㅇ
+        "w",   # ㅈ
+        "c",   # ㅊ
+        "z",   # ㅋ
+        "x",   # ㅌ
+        "v",   # ㅍ
+        "g",   # ㅎ
+    ]
+    _HANGUL_BASE = 0xAC00
+    _HANGUL_LAST = 0xD7A3
+    _CHO_DIV = 588
+    _JUNG_DIV = 28
+
     def __init__(self, config: ADBConfig, *, dry_run: bool = False):
         self.config = config
         self.dry_run = dry_run
@@ -45,7 +127,17 @@ class ADBController:
 
     def type_text(self, text: str) -> Sequence[str]:
         safe_text = text.replace(" ", "%s")
-        return self._run(["shell", "input", "text", safe_text])
+        try:
+            return self._run(["shell", "input", "text", safe_text])
+        except subprocess.CalledProcessError:
+            # Some Android builds can't inject Hangul directly via `input text` (NPE in InputShellCommand).
+            # Fall back to typing dubeolsik keystrokes, which are ASCII and therefore injectable.
+            if any(self._HANGUL_BASE <= ord(ch) <= self._HANGUL_LAST for ch in text):
+                fallback = self._hangul_to_dubeolsik(text)
+                safe_fallback = fallback.replace(" ", "%s")
+                logger.warning("adb input text failed for Hangul; falling back to dubeolsik keystrokes")
+                return self._run(["shell", "input", "text", safe_fallback])
+            raise
 
     def back(self) -> Sequence[str]:
         """Press back button."""
@@ -76,3 +168,28 @@ class ADBController:
         subprocess.run(final_cmd, shell=True, check=True)
         time.sleep(1.5)  # 동작완료 대기
         return full_cmd
+
+    @classmethod
+    def _hangul_to_dubeolsik(cls, text: str) -> str:
+        """
+        Convert Hangul syllables to dubeolsik (2-set) keystrokes.
+
+        Example:
+            "대상혁 버거" -> "eotkdgur qjrj"
+
+        This relies on the device keyboard/IME being in Korean mode for the keystrokes
+        to compose into Hangul. If the IME is in English mode, it will type the keystrokes
+        literally, but it will not crash.
+        """
+        out: List[str] = []
+        for ch in text:
+            code = ord(ch)
+            if cls._HANGUL_BASE <= code <= cls._HANGUL_LAST:
+                sindex = code - cls._HANGUL_BASE
+                cho = sindex // cls._CHO_DIV
+                jung = (sindex % cls._CHO_DIV) // cls._JUNG_DIV
+                jong = sindex % cls._JUNG_DIV
+                out.append(cls._CHO_KEYS[cho] + cls._JUNG_KEYS[jung] + cls._JONG_KEYS[jong])
+            else:
+                out.append(ch)
+        return "".join(out)
