@@ -28,14 +28,15 @@ dependencies = [
     "openai>=1.0.0",
     "requests>=2.31.0",
     "pillow>=10.0.0",
-    "langgraph>=0.2.0",
+    "langgraph>=1.0.0,<2.0.0",
 ]
 
 [project.optional-dependencies]
+planning = ["langchain-community>=0.2.0", "tavily-python>=0.3.0"]
 tts = ["mlx-audio>=0.1.0"]
 stt = ["google-cloud-speech>=2.0.0", "google-auth>=2.0.0"]
 dev = ["pytest>=7.0.0", "black>=24.0.0", "ruff>=0.3.0"]
-all = ["kiosk-agent[tts,stt,dev]"]
+all = ["kiosk-agent[planning,tts,stt,dev]"]
 
 [project.scripts]
 kiosk-agent = "api.main:app"

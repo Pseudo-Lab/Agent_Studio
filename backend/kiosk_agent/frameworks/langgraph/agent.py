@@ -6,7 +6,6 @@ import time
 from typing import Any, Dict, Iterator, Optional, cast
 
 from PIL import Image
-from langgraph.graph.state import CompiledStateGraph
 
 from ...config import AgentConfig
 from ...core import ADBController, ActionTranslator, AndroidScreenshotter, CapturedScreen
@@ -62,7 +61,8 @@ class KioskAgent(PlanningMixin, NodeMixin, GraphMixin, BaseAgent):
         self.tts_keep_last_n = config.tts_keep_last_n
         self.enable_tts = enable_tts
         self.enable_planning = enable_planning or config.planning.enabled
-        self.graph: Optional[CompiledStateGraph] = None
+        # NOTE: LangGraph 1.x returns a CompiledGraph; avoid importing version-specific types here.
+        self.graph: Optional[Any] = None
         
         # Initialize model client
         self._init_model_client(config)
@@ -158,7 +158,7 @@ class KioskAgent(PlanningMixin, NodeMixin, GraphMixin, BaseAgent):
         self, 
         instruction: str, 
         previous_state: Optional[AgentState] = None
-    ) -> tuple[CompiledStateGraph, AgentState]:
+    ) -> tuple[Any, AgentState]:
         """Prepare graph and initial state for execution."""
         if previous_state:
             initial_state = previous_state

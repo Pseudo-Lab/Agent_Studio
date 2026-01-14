@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import Any, Literal
 
 from langgraph.graph import END, StateGraph
-from langgraph.graph.state import CompiledStateGraph
 
 from ...types import AgentState
 from ...utils import get_logger
@@ -30,7 +29,7 @@ class GraphMixin:
     - plan: Generate step-by-step plan
     """
 
-    def _build_graph(self) -> CompiledStateGraph:
+    def _build_graph(self) -> Any:
         """
         Build LangGraph workflow.
         
