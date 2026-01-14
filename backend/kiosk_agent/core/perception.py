@@ -48,7 +48,21 @@ class AndroidScreenshotter:
             check=True,
             capture_output=True,
         )
-        image = Image.open(BytesIO(proc.stdout)).convert("RGB")
+        
+        # Check if we got valid data
+        if not proc.stdout or len(proc.stdout) < 100:
+            raise RuntimeError(
+                f"ADB returned empty or invalid screenshot data ({len(proc.stdout) if proc.stdout else 0} bytes). "
+                "Please check: 1) Device screen is on, 2) Device is unlocked, 3) Run 'adb shell screencap -p > test.png' manually to verify."
+            )
+        
+        try:
+            image = Image.open(BytesIO(proc.stdout)).convert("RGB")
+        except Exception as e:
+            raise RuntimeError(
+                f"Failed to decode screenshot: {e}. "
+                f"Received {len(proc.stdout)} bytes. Device may be in an unsupported state."
+            ) from e
         save_path = None
         if save:
             timestamp = datetime.utcnow().strftime("%Y%m%dT%H%M%S%fZ")
