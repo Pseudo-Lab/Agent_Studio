@@ -656,20 +656,6 @@ export default function Home() {
                   {/* Thinking Block - Sophisticated Minimalist (hide if 0 steps and not streaming) */}
                   {msg.type === 'thinking' && (msg.isStreaming || (msg.steps && msg.steps.length > 0)) && (
                     <div className="mb-10 pl-1">
-                      {/* Planning panel should live with the thinking block (not as a global top banner) */}
-                      {enablePlanning &&
-                        showPlanningPanel &&
-                        planningState &&
-                        msg.id === currentThinkingIdRef.current && (
-                          <div className="mb-4 opacity-100">
-                            <PlanningPanel
-                              planningState={planningState}
-                              isVisible={true}
-                              onClose={() => setShowPlanningPanel(false)}
-                            />
-                          </div>
-                        )}
-
                       <div className="opacity-50 hover:opacity-80 transition-opacity duration-300">
                         {/* Thinking Header */}
                         <button
@@ -718,6 +704,20 @@ export default function Home() {
                               className="overflow-hidden"
                             >
                               <div className="mt-5 ml-2.5 pl-6 border-l border-white/[0.1] space-y-10 py-1">
+                                {/* Planning panel (inside step area) */}
+                                {enablePlanning &&
+                                  showPlanningPanel &&
+                                  planningState &&
+                                  msg.id === currentThinkingIdRef.current && (
+                                    <div className="opacity-100">
+                                      <PlanningPanel
+                                        planningState={planningState}
+                                        isVisible={true}
+                                        onClose={() => setShowPlanningPanel(false)}
+                                      />
+                                    </div>
+                                  )}
+
                                 {msg.steps?.map((step, idx) => (
                                   <motion.div
                                     key={step.id}
