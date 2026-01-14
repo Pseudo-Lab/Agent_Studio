@@ -332,7 +332,7 @@ AGENT_TTS_THOUGHT_MAX_CHARS=320          # Thought TTS 최대 문자수
 # Local vLLM (선택)
 # ─────────────────────────────────────────────────────────
 VLLM_BASE_URL=http://localhost:8000      # vLLM 서버 URL
-VLLM_MODEL_NAME=AgentCPM-GUI             # 모델명
+VLLM_MODEL_NAME=midm2.0            # 모델명
 ```
 
 ### Step 4: Character Setup (TTS 사용 시)
