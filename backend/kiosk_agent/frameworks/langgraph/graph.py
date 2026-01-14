@@ -24,9 +24,7 @@ class GraphMixin:
     - analyze: Situation analysis
     
     When Planning Mode is enabled, adds:
-    - detect_unknown: Detect unknown entities
-    - web_search: Search for context (Tavily)
-    - plan: Generate step-by-step plan
+    - planning: Unified node (detect + search tool + plan)
     """
 
     def _build_graph(self) -> Any:
@@ -42,16 +40,16 @@ class GraphMixin:
         
         Graph structure (Planning enabled):
         
-        detect_unknown -> [search] -> plan -> vlm -> execute -> router -> ...
+        planning -> vlm -> execute -> router -> ...
+        
+        Note: Planning uses Tavily as internal tool, not separate node.
         """
         builder = StateGraph(AgentState)
         
-        # Planning Phase nodes (conditional)
+        # Planning node (single unified node with internal tool usage)
         if getattr(self, 'enable_planning', False):
-            logger.info("Building graph with Planning Mode enabled")
-            builder.add_node("detect_unknown", self._detect_unknown_node)
-            builder.add_node("web_search", self._web_search_node)
-            builder.add_node("plan", self._plan_node)
+            logger.info("Building graph with Planning Mode (single planning node)")
+            builder.add_node("planning", self._planning_node)
         
         # VLA Phase nodes
         builder.add_node("vlm", self._vlm_node)
@@ -62,19 +60,8 @@ class GraphMixin:
         
         # Set entry point based on planning mode
         if getattr(self, 'enable_planning', False):
-            builder.set_entry_point("detect_unknown")
-            
-            # Planning edges
-            builder.add_conditional_edges(
-                "detect_unknown",
-                self._should_search,
-                {
-                    "search": "web_search",
-                    "plan": "plan",
-                },
-            )
-            builder.add_edge("web_search", "plan")
-            builder.add_edge("plan", "vlm")
+            builder.set_entry_point("planning")
+            builder.add_edge("planning", "vlm")
         else:
             builder.set_entry_point("vlm")
         
