@@ -675,132 +675,85 @@ export default function Home() {
                       transition={{ duration: 0.4, ease: "easeOut" }}
                       className="flex justify-center my-8"
                     >
-                      <div className="relative max-w-sm w-full">
+                      <div className="relative w-[420px]">
                         {/* Animated glow effect */}
                         <motion.div 
-                          animate={{ opacity: [0.4, 0.6, 0.4] }}
+                          animate={{ opacity: [0.3, 0.5, 0.3] }}
                           transition={{ duration: 3, repeat: Infinity }}
-                          className="absolute -inset-2 bg-gradient-to-r from-emerald-500/20 via-teal-500/15 to-emerald-500/20 rounded-3xl blur-xl" 
+                          className="absolute -inset-1 bg-gradient-to-r from-emerald-500/15 to-teal-500/15 rounded-2xl blur-lg" 
                         />
                         
-                        <div className="relative bg-gradient-to-b from-[#1c1c22] to-[#141418] border border-white/[0.08] rounded-2xl p-8 shadow-2xl overflow-hidden">
-                          {/* Background pattern */}
-                          <div className="absolute inset-0 opacity-[0.03]">
-                            <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
-                          </div>
-                          
-                          {/* Android Robot Icon - Cute style */}
-                          <div className="relative flex justify-center mb-6">
+                        <div className="relative bg-gradient-to-b from-[#1a1a1f] to-[#131316] border border-white/[0.06] rounded-2xl px-6 py-5 shadow-2xl">
+                          {/* Header row: Robot + Text side by side */}
+                          <div className="flex items-center gap-5 mb-4">
+                            {/* Android Robot Icon - Compact */}
                             <motion.div
-                              animate={{ y: [0, -4, 0] }}
-                              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                              className="relative"
+                              animate={{ y: [0, -3, 0] }}
+                              transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                              className="relative flex-shrink-0"
                             >
-                              {/* Robot body glow */}
-                              <div className="absolute inset-0 bg-emerald-400/20 rounded-full blur-xl scale-150" />
-                              
-                              {/* Android Robot SVG */}
-                              <svg className="w-20 h-20 relative" viewBox="0 0 96 96" fill="none">
-                                {/* Antennas */}
-                                <motion.line 
-                                  animate={{ rotate: [-8, 8, -8] }}
-                                  transition={{ duration: 1.5, repeat: Infinity }}
-                                  style={{ transformOrigin: '32px 28px' }}
-                                  x1="32" y1="28" x2="24" y2="16" 
-                                  stroke="#3DDC84" strokeWidth="4" strokeLinecap="round"
-                                />
-                                <motion.line 
-                                  animate={{ rotate: [8, -8, 8] }}
-                                  transition={{ duration: 1.5, repeat: Infinity }}
-                                  style={{ transformOrigin: '64px 28px' }}
-                                  x1="64" y1="28" x2="72" y2="16" 
-                                  stroke="#3DDC84" strokeWidth="4" strokeLinecap="round"
-                                />
-                                
-                                {/* Head */}
-                                <path d="M20 44C20 33.5 28.5 28 48 28C67.5 28 76 33.5 76 44V48C76 52 72 56 68 56H28C24 56 20 52 20 48V44Z" fill="#3DDC84"/>
-                                
-                                {/* Eyes */}
-                                <circle cx="36" cy="42" r="4" fill="#1a1a1f"/>
-                                <circle cx="60" cy="42" r="4" fill="#1a1a1f"/>
-                                
-                                {/* Body */}
-                                <rect x="24" y="58" width="48" height="28" rx="4" fill="#3DDC84"/>
-                                
-                                {/* Arms */}
-                                <rect x="12" y="58" width="8" height="20" rx="4" fill="#3DDC84"/>
-                                <rect x="76" y="58" width="8" height="20" rx="4" fill="#3DDC84"/>
+                              <div className="absolute inset-0 bg-emerald-400/15 rounded-full blur-lg scale-125" />
+                              <svg className="w-14 h-14 relative" viewBox="0 0 96 96" fill="none">
+                                <line x1="32" y1="28" x2="26" y2="18" stroke="#3DDC84" strokeWidth="3.5" strokeLinecap="round"/>
+                                <line x1="64" y1="28" x2="70" y2="18" stroke="#3DDC84" strokeWidth="3.5" strokeLinecap="round"/>
+                                <path d="M22 44C22 35 30 28 48 28C66 28 74 35 74 44V48C74 51 71 54 68 54H28C25 54 22 51 22 48V44Z" fill="#3DDC84"/>
+                                <circle cx="36" cy="42" r="3.5" fill="#1a1a1f"/>
+                                <circle cx="60" cy="42" r="3.5" fill="#1a1a1f"/>
+                                <rect x="26" y="56" width="44" height="24" rx="3" fill="#3DDC84"/>
+                                <rect x="14" y="56" width="7" height="16" rx="3.5" fill="#3DDC84"/>
+                                <rect x="75" y="56" width="7" height="16" rx="3.5" fill="#3DDC84"/>
                               </svg>
-                              
-                              {/* Disconnected cable */}
-                              <motion.div 
-                                animate={{ rotate: [0, 5, 0, -5, 0] }}
-                                transition={{ duration: 2, repeat: Infinity }}
-                                className="absolute -bottom-2 -right-2"
-                              >
-                                <div className="w-8 h-8 bg-gradient-to-br from-gray-700 to-gray-800 rounded-full flex items-center justify-center border-2 border-[#1c1c22] shadow-lg">
-                                  <svg className="w-4 h-4 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                                    <path d="M18 6L6 18M6 6l12 12" />
-                                  </svg>
-                                </div>
-                              </motion.div>
+                              {/* X indicator */}
+                              <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-gray-800 rounded-full flex items-center justify-center border border-gray-700">
+                                <svg className="w-3 h-3 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+                                  <path d="M18 6L6 18M6 6l12 12" />
+                                </svg>
+                              </div>
                             </motion.div>
+                            
+                            {/* Title & Hint */}
+                            <div className="flex-1 min-w-0">
+                              <h3 className="text-base font-bold text-white leading-tight">
+                                디바이스 연결 필요
+                              </h3>
+                              <p className="text-xs text-gray-400 mt-0.5">
+                                USB 디버깅이 활성화된 Android 기기를 연결하세요
+                              </p>
+                            </div>
                           </div>
                           
-                          {/* Title */}
-                          <h3 className="relative text-center text-lg font-bold text-white mb-2 tracking-tight">
-                            {msg.content}
-                          </h3>
-                          
-                          {/* Hint */}
-                          {msg.metadata?.hint && (
-                            <p className="relative text-center text-sm text-gray-400 mb-5">
-                              {msg.metadata.hint}
-                            </p>
-                          )}
-                          
-                          {/* Steps - Modern style */}
-                          <div className="relative space-y-2.5">
+                          {/* Steps - Compact horizontal layout */}
+                          <div className="flex gap-2 mb-3">
                             {[
-                              { num: 1, text: 'USB 케이블로 Android 디바이스 연결', icon: '🔌' },
-                              { num: 2, text: '설정 → 개발자 옵션 → USB 디버깅 ON', icon: '⚙️' },
-                              { num: 3, text: '"USB 디버깅 허용" 팝업에서 승인', icon: '✅' },
+                              { icon: '🔌', text: 'USB 연결' },
+                              { icon: '⚙️', text: '디버깅 ON' },
+                              { icon: '✓', text: '허용 승인' },
                             ].map((step, i) => (
                               <motion.div
-                                key={step.num}
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.3 + i * 0.1 }}
-                                className="flex items-center gap-3 p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.05]"
+                                key={i}
+                                initial={{ opacity: 0, y: 5 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.2 + i * 0.08 }}
+                                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-white/[0.03] border border-white/[0.05]"
                               >
-                                <span className="text-base">{step.icon}</span>
-                                <span className="text-xs text-gray-300">{step.text}</span>
+                                <span className="text-sm">{step.icon}</span>
+                                <span className="text-[11px] text-gray-400">{step.text}</span>
                               </motion.div>
                             ))}
                           </div>
                           
-                          {/* Terminal hint */}
-                          <motion.div 
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 0.6 }}
-                            className="relative mt-5 p-3 bg-black/50 rounded-xl border border-emerald-500/20"
-                          >
-                            <div className="flex items-center gap-2 mb-1">
-                              <div className="flex gap-1">
-                                <div className="w-2 h-2 rounded-full bg-red-500/60" />
-                                <div className="w-2 h-2 rounded-full bg-yellow-500/60" />
-                                <div className="w-2 h-2 rounded-full bg-green-500/60" />
+                          {/* Terminal hint - Inline */}
+                          <div className="flex items-center justify-between p-2 bg-black/40 rounded-lg border border-white/[0.04]">
+                            <div className="flex items-center gap-2">
+                              <div className="flex gap-0.5">
+                                <div className="w-1.5 h-1.5 rounded-full bg-red-500/50" />
+                                <div className="w-1.5 h-1.5 rounded-full bg-yellow-500/50" />
+                                <div className="w-1.5 h-1.5 rounded-full bg-green-500/50" />
                               </div>
-                              <span className="text-[9px] text-gray-500 uppercase tracking-wider">Terminal</span>
+                              <code className="text-[11px] text-emerald-400 font-mono">$ adb devices</code>
                             </div>
-                            <code className="text-xs text-emerald-400 font-mono">
-                              $ adb devices
-                            </code>
-                            <p className="text-[10px] text-gray-500 mt-1.5">
-                              연결 상태를 확인하세요
-                            </p>
-                          </motion.div>
+                            <span className="text-[10px] text-gray-500">연결 확인</span>
+                          </div>
                         </div>
                       </div>
                     </motion.div>
