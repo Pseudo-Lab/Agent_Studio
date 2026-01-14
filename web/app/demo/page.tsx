@@ -57,6 +57,7 @@ export default function Home() {
   const [requiresHumanInput, setRequiresHumanInput] = useState(false);
   const [activeInterruptId, setActiveInterruptId] = useState<string | null>(null);
   const [currentCharacter, setCurrentCharacter] = useState<CharacterInfo | null>(null);  // 현재 세션의 캐릭터
+  const currentCharacterRef = useRef<CharacterInfo | null>(null); // 최신 캐릭터(UX용, stale 방지)
 
   // TTS audio is now stored per-message in ChatMessage.audioPath
 
@@ -196,6 +197,7 @@ export default function Home() {
       const startCharacter: CharacterInfo | undefined = (event as any).chef;
       if (startCharacter) {
         console.log('[RUN_STARTED] Character assigned:', startCharacter.nickname);
+        currentCharacterRef.current = startCharacter;
         setCurrentCharacter(startCharacter);
       }
       // 새 Thinking 블록 생성
@@ -250,9 +252,15 @@ export default function Home() {
         const characterInfo: CharacterInfo | undefined = (event as any).chef ?? result?.chef;
         // 캐릭터 정보 저장
         if (characterInfo) {
+          currentCharacterRef.current = characterInfo;
           setCurrentCharacter(characterInfo);
         }
-        addMessage({ type: 'result', content: resultMsg, audioPath: ttsPath, character: characterInfo || currentCharacter });
+        addMessage({
+          type: 'result',
+          content: resultMsg,
+          audioPath: ttsPath,
+          character: characterInfo || currentCharacterRef.current,
+        });
         latestTtsAudioPathRef.current = null;  // Clear after use
       }
     }
@@ -310,11 +318,11 @@ export default function Home() {
             content: question,
             options,
             reason,
-            character: currentCharacter,  // 현재 세션의 캐릭터 정보 추가
+            character: currentCharacterRef.current,  // 최신 캐릭터(늦게 붙는 현상 방지)
             audioPath: savedAudioPath || undefined,  // 저장된 TTS 오디오
           });
           setActiveInterruptId(interruptMsgId);
-          console.log('[Interrupt] Created with character:', currentCharacter?.nickname, 'audioPath:', savedAudioPath);
+          console.log('[Interrupt] Created with character:', currentCharacterRef.current?.nickname, 'audioPath:', savedAudioPath);
         }
         setRequiresHumanInput(true);
       }
@@ -330,6 +338,7 @@ export default function Home() {
       const hitlCharacter: CharacterInfo | undefined = (event as any).value?.chef;
       if (hitlCharacter) {
         console.log('[HITL] Character info received:', hitlCharacter);
+        currentCharacterRef.current = hitlCharacter;
         setCurrentCharacter(hitlCharacter);
         // 최근 interrupt 메시지에 캐릭터 정보 추가 (항상 업데이트)
         setMessages(prev => {
@@ -430,6 +439,7 @@ export default function Home() {
     // 새 작업 시작 - interrupt 기록 초기화, 셰프 초기화, Planning 초기화
     seenInterruptsRef.current.clear();
     setCurrentCharacter(null);  // 새 세션에서 새 캐릭터 할당을 위해 초기화
+    currentCharacterRef.current = null;
     setPlanningState(null);  // Planning 상태 초기화
     setShowPlanningPanel(enablePlanning);  // Planning 모드면 패널 표시
     setIsRunning(true);
