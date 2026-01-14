@@ -9,7 +9,7 @@ from PIL import Image
 from ...types import AgentState, HistoryEntry
 from ...utils import get_logger, compute_difference, compute_screen_id, parse_analysis_response, build_analysis_prompt
 from ...utils.common import format_thought_history
-from .prompts import USER_PROMPT_TEMPLATE
+from .prompts import USER_PROMPT_TEMPLATE, USER_PROMPT_WITH_PLAN_TEMPLATE
 
 logger = get_logger(__name__)
 
@@ -32,14 +32,49 @@ class NodeMixin:
         
         Captures screen, sends to VLM with history context,
         and receives proposed action.
+        
+        When Planning Mode is enabled with a plan, uses step-by-step
+        to-do style prompting.
         """
         screenshot = self._get_screen()
-        
         thought_history = format_thought_history(state.get("history", []))
-        full_instruction = USER_PROMPT_TEMPLATE.format(
-            thought_history=thought_history,
-            user_instruction=state["instruction"]
-        )
+        
+        # Check if we should use Plan Mode prompt (to-do style)
+        plan = state.get("plan", [])
+        enable_planning = getattr(self, 'enable_planning', False)
+        
+        if enable_planning and plan:
+            # To-do style: focus on current step
+            plan_step_index = state.get("plan_step_index", 0)
+            total_steps = len(plan)
+            
+            # Build plan steps display (with checkboxes)
+            plan_steps_display = []
+            for idx, step in enumerate(plan):
+                if idx < plan_step_index:
+                    plan_steps_display.append(f"  ✅ {step}")
+                elif idx == plan_step_index:
+                    plan_steps_display.append(f"  ➡️ {step} ← 현재")
+                else:
+                    plan_steps_display.append(f"  ⬜ {step}")
+            
+            current_step = plan[plan_step_index] if plan_step_index < total_steps else "모든 단계 완료"
+            
+            full_instruction = USER_PROMPT_WITH_PLAN_TEMPLATE.format(
+                thought_history=thought_history,
+                plan_steps="\n".join(plan_steps_display),
+                current_step_num=plan_step_index + 1,
+                total_steps=total_steps,
+                current_step=current_step,
+                user_instruction=state.get("original_instruction") or state["instruction"],
+            )
+            logger.info(f"[Plan Mode] Executing step {plan_step_index + 1}/{total_steps}: {current_step[:30]}...")
+        else:
+            # Standard prompt (no planning)
+            full_instruction = USER_PROMPT_TEMPLATE.format(
+                thought_history=thought_history,
+                user_instruction=state["instruction"]
+            )
         
         model_action = self.model_client.propose_action(full_instruction, screenshot.image)
         payload = model_action.payload
@@ -83,6 +118,9 @@ class NodeMixin:
         
         Evaluates execution results, computes progress,
         updates history, and determines next route.
+        
+        In Plan Mode, also detects step completion and advances
+        to the next step.
         """
         post_screen_path = state.get("post_action_path")
         pre_screen_path = state.get("pre_action_path")
@@ -116,13 +154,31 @@ class NodeMixin:
         elif payload.get("interrupt") or payload.get("action") == "INTERRUPT":
             status = "needs_human"
 
+        # Plan Mode: detect step completion and advance to next step
+        plan_step_index = state.get("plan_step_index", 0)
+        plan = state.get("plan", [])
+        step_completed = False
+        
+        if getattr(self, 'enable_planning', False) and plan:
+            thought = state.get("thought", "") or ""
+            # Detect step completion signals
+            if "단계 완료" in thought or "✅" in thought or "step complete" in thought.lower():
+                step_completed = True
+                plan_step_index += 1
+                logger.info(f"[Plan Mode] ✅ Step completed! Advancing to step {plan_step_index + 1}/{len(plan)}")
+                
+                # Check if all steps completed
+                if plan_step_index >= len(plan):
+                    logger.info("[Plan Mode] 🎉 All steps completed!")
+                    status = "task_complete"
+
         # Delegate route decision
         temp_state: AgentState = {**state, "status": status, "history": history}
         route = self._determine_route(temp_state)
         
         logger.debug(f"Router: status={status}, route={route}, progress={progress}")
 
-        return {
+        result = {
             "history": history,
             "status": status,
             "route": route,
@@ -131,6 +187,13 @@ class NodeMixin:
             "current_screen_id": new_screen_id or state.get("current_screen_id"),
             "last_iteration_id": iteration,
         }
+        
+        # Update plan_step_index if step was completed
+        if step_completed:
+            result["plan_step_index"] = plan_step_index
+            result["step_completed"] = True
+        
+        return result
 
     def _human_node(self, state: AgentState) -> AgentState:
         """

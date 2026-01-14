@@ -37,6 +37,9 @@ export interface PlanningState {
   unknownEntities: string[];
   searchContext: string;
   plan: string[];
+  // To-do style step tracking
+  planStepIndex: number;  // Current step being executed
+  stepCompleted?: boolean;  // True when a step just completed
 }
 
 export interface AGUIEvent {

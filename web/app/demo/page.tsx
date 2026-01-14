@@ -371,7 +371,7 @@ export default function Home() {
       }
     }
 
-    // Planning Mode update
+    // Planning Mode update (initial plan)
     if (event.type === 'CUSTOM' && event.name === 'planning_update') {
       const value = (event as any).value;
       if (value) {
@@ -382,10 +382,34 @@ export default function Home() {
           unknownEntities: value.unknown_entities || [],
           searchContext: value.search_context || "",
           plan: value.plan || [],
+          planStepIndex: 0,  // Start at step 0
         });
         setShowPlanningPanel(true);
-        
-        // Keep planning panel visible (user can close manually)
+      }
+    }
+
+    // Plan step update (to-do style progress)
+    if (event.type === 'CUSTOM' && event.name === 'plan_step_update') {
+      const value = (event as any).value;
+      if (value) {
+        console.log('[Planning] Step update:', value.plan_step_index, '/', value.total_steps);
+        setPlanningState(prev => prev ? {
+          ...prev,
+          planStepIndex: value.plan_step_index ?? prev.planStepIndex,
+          stepCompleted: true,
+        } : null);
+      }
+    }
+
+    // Also update planStepIndex from STATE_SNAPSHOT (real-time progress)
+    if (event.type === 'STATE_SNAPSHOT' && event.snapshot) {
+      const s = event.snapshot;
+      if (s.plan && typeof s.plan_step_index === 'number') {
+        setPlanningState(prev => prev ? {
+          ...prev,
+          planStepIndex: s.plan_step_index,
+          stepCompleted: s.step_completed || false,
+        } : null);
       }
     }
   }, [addMessage, addThinkingStep, finalizeThinking, activeInterruptId]);

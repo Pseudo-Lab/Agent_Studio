@@ -53,6 +53,7 @@ def snapshot_from_state(state: Dict[str, Any]) -> Dict[str, Any]:
     plan = state.get("plan", [])
     plan_step_index = state.get("plan_step_index", 0)
     planning_complete = state.get("planning_complete", True)
+    step_completed = state.get("step_completed", False)
     
     interrupt = payload.get("interrupt")
     action = payload.get("action")
@@ -74,10 +75,11 @@ def snapshot_from_state(state: Dict[str, Any]) -> Dict[str, Any]:
         "interrupt": interrupt,
         "progress": state.get("progress"),
         "difference": state.get("difference"),
-        # Planning fields
+        # Planning fields (to-do style)
         "plan": plan if plan else None,
         "plan_step_index": plan_step_index if plan else None,
         "planning_complete": planning_complete,
+        "step_completed": step_completed,  # True when a plan step was just completed
     }
 
 
@@ -213,6 +215,18 @@ class AgentStreamer:
                         logger.debug(f"Snapshot: iter={iteration}, action={current_action}")
                         q.put(("snapshot", snap))
                         
+                        # Plan step completion event (to-do style progress)
+                        if snap.get("step_completed") and snap.get("plan"):
+                            step_event = {
+                                "plan": snap["plan"],
+                                "plan_step_index": snap["plan_step_index"],
+                                "total_steps": len(snap["plan"]),
+                                "current_step": snap["plan"][snap["plan_step_index"]] if snap["plan_step_index"] < len(snap["plan"]) else None,
+                                "completed_steps": snap["plan"][:snap["plan_step_index"]],
+                            }
+                            q.put(("plan_step", step_event))
+                            logger.info(f"[Plan Mode] Step {snap['plan_step_index']}/{len(snap['plan'])} completed")
+                        
                         # TTS for thought (if enabled)
                         if agent.tts and not is_interrupt and os.getenv("AGENT_TTS_THOUGHT", "0") in {"1", "true"}:
                             try:
@@ -314,6 +328,8 @@ class AgentStreamer:
                         yield sse_encode({"type": "STATE_SNAPSHOT", "snapshot": payload})
                     elif kind == "planning":
                         yield sse_encode({"type": "CUSTOM", "name": "planning_update", "value": payload})
+                    elif kind == "plan_step":
+                        yield sse_encode({"type": "CUSTOM", "name": "plan_step_update", "value": payload})
                     elif kind == "hitl":
                         yield sse_encode({"type": "CUSTOM", "name": "waiting_human", "value": payload})
                     elif kind == "tts":

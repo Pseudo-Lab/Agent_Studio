@@ -2,7 +2,7 @@
 
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, ListChecks, Loader2, Globe, SlidersHorizontal, X } from "lucide-react";
+import { Search, ListChecks, Loader2, Globe, SlidersHorizontal, X, CheckCircle2, Circle, ArrowRight } from "lucide-react";
 import type { PlanningState } from "../types";
 
 type Props = {
@@ -29,8 +29,8 @@ const statusConfig = {
   },
   planning_complete: {
     icon: ListChecks,
-    label: "계획 완료",
-    description: "이제 실행을 시작할게요",
+    label: "실행 중",
+    description: "계획에 따라 진행 중이에요",
   },
 };
 
@@ -147,31 +147,82 @@ export function PlanningPanel({ planningState, isVisible, onClose }: Props) {
           </motion.div>
         )}
 
-        {/* Plan Steps */}
+        {/* Plan Steps - To-do checkbox style */}
         {planningState.plan.length > 0 && planningState.status === "planning_complete" && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
           >
-            <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-2 font-semibold">
-              Steps
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-[10px] text-gray-500 uppercase tracking-widest font-semibold">
+                To-do
+              </div>
+              <div className="text-[10px] text-amber-400/80 font-bold">
+                {planningState.planStepIndex}/{planningState.plan.length}
+              </div>
             </div>
             <div className="space-y-1.5">
-              {planningState.plan.map((step, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 + i * 0.1 }}
-                  className="flex items-start gap-2.5"
-                >
-                  <div className="flex-shrink-0 w-5 h-5 rounded-full bg-amber-400/10 border border-amber-400/20 flex items-center justify-center mt-0.5">
-                    <span className="text-[10px] font-bold text-amber-300">{i + 1}</span>
-                  </div>
-                  <span className="text-xs text-gray-300 leading-relaxed line-clamp-2">{step}</span>
-                </motion.div>
-              ))}
+              {planningState.plan.map((step, i) => {
+                const isCompleted = i < planningState.planStepIndex;
+                const isCurrent = i === planningState.planStepIndex;
+                const isPending = i > planningState.planStepIndex;
+                
+                return (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.3 + i * 0.1 }}
+                    className={`flex items-start gap-2.5 py-1 px-2 rounded-lg transition-colors ${
+                      isCurrent ? "bg-amber-400/10 border border-amber-400/20" : ""
+                    }`}
+                  >
+                    {/* Step indicator */}
+                    <div className="flex-shrink-0 mt-0.5">
+                      {isCompleted && (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                      )}
+                      {isCurrent && (
+                        <motion.div
+                          animate={{ scale: [1, 1.1, 1] }}
+                          transition={{ duration: 1.5, repeat: Infinity }}
+                        >
+                          <ArrowRight className="w-4 h-4 text-amber-400" />
+                        </motion.div>
+                      )}
+                      {isPending && (
+                        <Circle className="w-4 h-4 text-gray-600" />
+                      )}
+                    </div>
+                    
+                    {/* Step text */}
+                    <span
+                      className={`text-xs leading-relaxed line-clamp-2 ${
+                        isCompleted
+                          ? "text-gray-500 line-through"
+                          : isCurrent
+                          ? "text-amber-200 font-medium"
+                          : "text-gray-400"
+                      }`}
+                    >
+                      {step}
+                    </span>
+                  </motion.div>
+                );
+              })}
+            </div>
+            
+            {/* Progress bar */}
+            <div className="mt-3 h-1 bg-white/[0.06] rounded-full overflow-hidden">
+              <motion.div
+                className="h-full bg-gradient-to-r from-amber-400 to-orange-400"
+                initial={{ width: 0 }}
+                animate={{
+                  width: `${((planningState.planStepIndex) / planningState.plan.length) * 100}%`,
+                }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+              />
             </div>
           </motion.div>
         )}

@@ -1,6 +1,6 @@
 """Prompt templates for LangGraph Kiosk Agent."""
 
-from .vlm import USER_PROMPT_TEMPLATE
+from .vlm import USER_PROMPT_TEMPLATE, USER_PROMPT_WITH_PLAN_TEMPLATE
 from .planning import (
     DETECT_UNKNOWN_PROMPT,
     PLAN_GENERATION_PROMPT,
@@ -9,6 +9,7 @@ from .planning import (
 
 __all__ = [
     "USER_PROMPT_TEMPLATE",
+    "USER_PROMPT_WITH_PLAN_TEMPLATE",
     "DETECT_UNKNOWN_PROMPT",
     "PLAN_GENERATION_PROMPT",
     "REPLAN_PROMPT",
