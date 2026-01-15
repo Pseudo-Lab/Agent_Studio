@@ -1,10 +1,4 @@
-오픈소스 관례에 따라 **Gemini 3 모델 선택** 기능과 **Gemma 업데이트 로드맵**을 반영한 영문 `README.md` 전체 코드입니다.
 
----
-
-# 🔨 README.md (English)
-
-```markdown
 # 🔨 AgentStudio
 
 <div align="center">
@@ -187,12 +181,3 @@ Distributed under the **Apache License 2.0**. See `LICENSE` for more information
 Developed with ❤️ by <b>Pseudo-Lab</b>
 </div>
 
-```
-
------
-
-**Tip:** `README_KR.md` 파일도 동일한 구조로 만드신 후, 상단의 `English | 한국어` 링크가 서로를 잘 가리키도록 설정하시면 완성입니다\! 이 영문 버전 리드미를 프로젝트의 메인 `README.md`로 사용하시면 글로벌 사용자들에게 훨씬 전문적인 인상을 줄 수 있습니다.
-
-로드맵이나 모델 설명 섹션에 추가하고 싶은 구체적인 기술 스펙이 더 있으신가요?
-
-```
