@@ -1,4 +1,3 @@
-
 # 🔨 AgentStudio
 
 <div align="center">
@@ -26,31 +25,34 @@
 
 > **Vision-Language-Action (VLA) Agent for Automated Kiosk Interaction**
 
-Kiosk Agent is an AI system that utilizes Vision-Language Models (VLM) to automatically control Android kiosk applications. It interprets visual interfaces and executes precise actions to assist users.
+Kiosk Agent is an AI system that utilizes Vision-Language Models (VLM) to automatically control Android kiosk applications. It interprets visual interfaces and executes precise actions to assist users who may find digital kiosks challenging.
+
 
 <img width="2816" height="1536" alt="AgentStudio_Banner" src="https://github.com/user-attachments/assets/0036ca31-18a5-4d49-87c4-56998dccdcbb" />
 
 ### ✨ Features
 
-- **Multi-Model Intelligence**: Powered by `gemini-3-flash` and `gemini-3-pro` for versatile reasoning.
+- **Gemini-Powered Reasoning**: Support for both `gemini-3-flash` (high-speed) and `gemini-3-pro` (high-reasoning) models.
 - **VLA Paradigm**: Seamless workflow: Vision → Language → Action.
-- **[AG-UI Protocol](https://github.com/ag-ui-protocol/ag-ui)**: Standardized agent-to-UI communication.
-- **Human-in-the-Loop**: Asks the user for input when subjective choices are needed.
+- **[AG-UI Protocol](https://github.com/ag-ui-protocol/ag-ui)**: Standardized agent-to-UI communication protocol via SSE.
+- **Multi-Framework Support**: Built on LangGraph, with extensions for CrewAI and Google ADK.
+- **Human-in-the-Loop (HITL)**: Asks the user for input when subjective choices are required.
 - **Planning Mode**: Decomposes complex requests into steps with real-time To-do tracking.
-- **Voice Interface**: Native support for TTS (CosyVoice3) and STT (Google Cloud).
-- **Real-time Dashboard**: Live monitoring of the agent's thoughts and screen interactions.
+- **Voice Interface**: Supports TTS (CosyVoice3) and STT (Google Cloud).
+- **Real-time Dashboard**: Live monitoring of agent status and screen interactions.
 
 ---
 
 ## 🧠 Model Configuration
 
-AgentStudio allows you to toggle between high-performance and cost-efficient models depending on the complexity of the kiosk UI.
+AgentStudio allows you to switch between different Vision-Language Models depending on your needs.
 
-| Model | Provider | Status | Best For |
-|-------|----------|--------|----------|
-| **Gemini 3 Flash** | Google | ✅ Supported | High-speed, real-time interactions |
-| **Gemini 3 Pro** | Google | ✅ Supported | Complex reasoning, multi-step navigation |
-| **Gemma 2** | Google | 🔜 Upcoming | On-device processing & privacy-focused tasks |
+| Provider | Model | Status | Key Advantage |
+| :--- | :--- | :--- | :--- |
+| **Google** | `gemini-3-flash` | ✅ Supported | Low latency and cost-efficient |
+| **Google** | `gemini-3-pro` | ✅ Supported | Advanced reasoning for complex UI |
+| **OpenAI** | `gpt-4o-mini` | ✅ Supported | Robust performance across various tasks |
+| **Google** | `gemma-2` | 🔜 Roadmap | Optimized for on-device/local privacy |
 
 To switch models, update your `.env` file:
 ```bash
@@ -82,11 +84,28 @@ flowchart LR
 
 | Phase | Description |
 | --- | --- |
-| **Screen Capture** | Captures Android screen via ADB commands |
-| **VLM Reasoning** | Gemini analyzes the image and decides the next step |
-| **Action Decode** | Parses structured output into executable actions |
-| **Execute ADB** | Physical/Emulator manipulation (tap, swipe, input) |
-| **INTERRUPT** | Triggers Human-in-the-Loop for user decisions |
+| **Screen Capture** | Captures Android device screen via ADB |
+| **VLM Reasoning** | Gemini analyzes the screen to decide the next action |
+| **Action Decode** | Parses VLM output into structured executable commands |
+| **Execute ADB** | Controls the device using ADB (tap, swipe, input) |
+| **INTERRUPT** | Triggers HITL when user intervention is required |
+
+### 🔀 LangGraph State Machine
+
+We manage the agent's logic flow using LangGraph for stable state transitions.
+
+```mermaid
+flowchart TD
+    START([Start]) --> VLM[VLM Node]
+    VLM --> EXEC[Execute Node]
+    EXEC --> ROUTER{Router}
+    ROUTER -->|LOOP| VLM
+    ROUTER -->|INTERRUPT| HUMAN[Human Node]
+    ROUTER -->|FINISH| END([End])
+    HUMAN -->|Resume| VLM
+    HUMAN -->|Abort| END
+
+```
 
 ---
 
@@ -94,12 +113,10 @@ flowchart LR
 
 ### Prerequisites
 
-| Requirement | Version | Note |
-| --- | --- | --- |
-| Python | 3.10+ | 3.11 Recommended |
-| Node.js | 18+ | Required for Dashboard |
-| uv | Latest | Fast Python package manager |
-| ADB | - | Android Debug Bridge installed |
+* **Python**: 3.10+ (3.11 recommended)
+* **Node.js**: 18+ (for Dashboard)
+* **uv**: Latest (Fast Python package manager)
+* **ADB**: Android Debug Bridge installed
 
 ### Step 1: Clone Repository
 
@@ -116,7 +133,7 @@ cd Agent_Studio
 uv venv .venv
 source .venv/bin/activate
 
-# Install dependencies
+# Install dependencies in editable mode
 uv pip install -e backend/
 
 ```
@@ -125,7 +142,7 @@ uv pip install -e backend/
 
 ```bash
 cp .env.example .env
-# Edit .env and add your GOOGLE_API_KEY
+# Edit .env with your GOOGLE_API_KEY
 
 ```
 
@@ -135,11 +152,11 @@ cp .env.example .env
 
 | Action | Parameters | Description |
 | --- | --- | --- |
-| `CLICK` | `x, y` | Tap specific screen coordinates |
-| `INPUT` | `text` | Type text into active fields |
-| `SWIPE` | `x1, y1, x2, y2` | Scroll or navigate through lists |
-| `INTERRUPT` | `question` | Ask user for guidance (e.g., "Which size?") |
-| `FINISH` | - | Successfully completed the task |
+| `CLICK` | `x, y` | Tap specific coordinates |
+| `INPUT` | `text` | Type text into a field |
+| `SWIPE` | `x1, y1, x2, y2` | Scroll or navigate |
+| `INTERRUPT` | `question` | Ask user for guidance (HITL) |
+| `FINISH` | - | Task completed successfully |
 
 ---
 
@@ -148,15 +165,16 @@ cp .env.example .env
 ### ✅ v1.0.0 (Current)
 
 * LangGraph-based VLA Agent loop.
-* Support for **Gemini 3 (Flash/Pro)**.
+* Support for **Gemini 3 Flash/Pro**.
 * Planning Mode & HITL system.
-* Real-time SSE-based Dashboard.
+* Real-time Dashboard via AG-UI Protocol.
 
 ### 🔜 v1.1.0 (Scheduled Jan 2026)
 
-* **Gemma Integration**: Support for lightweight, on-device models.
+* **Gemma Integration**: Support for lightweight, on-device local models.
 * **Microsoft Agent Framework**: Semantic Kernel & Azure AI Agent Service integration.
 * **Google ADK**: Native Gemini Agent Framework support.
+* **CrewAI**: Multi-agent collaboration workflows.
 
 ---
 
@@ -173,11 +191,10 @@ cp .env.example .env
 
 ## 🗞 License
 
-Distributed under the **Apache License 2.0**. See `LICENSE` for more information.
+This project is licensed under the **Apache License 2.0**.
 
 ---
 
 <div align="center">
 Developed with ❤️ by <b>Pseudo-Lab</b>
 </div>
-
