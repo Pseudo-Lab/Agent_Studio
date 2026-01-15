@@ -1,5 +1,5 @@
 <div align="center">
-  <a href="README.md">English</a> | <a href="README_KR.md">한국어</a> | <a href="README_CN.md"><b>简体中文</b></a>
+  <a href="README.md"><b>English</b></a> | <a href="README_KR.md">한국어</a> | <a href="README_CN.md">简体中文</a>
 </div>
 
 # 🔨 AgentStudio
