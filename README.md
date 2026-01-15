@@ -52,7 +52,8 @@ AgentStudio allows you to switch between different Vision-Language Models depend
 | **Google** | `gemini-3-flash` | ✅ Supported | Low latency and cost-efficient |
 | **Google** | `gemini-3-pro` | ✅ Supported | Advanced reasoning for complex UI |
 | **OpenAI** | `gpt-4o-mini` | ✅ Supported | Robust performance across various tasks |
-| **Google** | `gemma-2` | 🔜 Roadmap | Optimized for on-device/local privacy |
+| **Google** | `gemma-3-27b` | 🔜 Roadmap | Optimized for on-device/local privacy |
+| **Microsoft** | `Fara-7B` | 🔜 Roadmap | Optimized Computed Ondevice Agent |
 
 To switch models, update your `.env` file:
 ```bash
