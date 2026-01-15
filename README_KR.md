@@ -1,8 +1,8 @@
-# 🔨 AgentStudio
-
 <div align="center">
   <a href="README.md"><b>English</b></a> | <a href="README_KR.md"><b>한국어</b></a>
 </div>
+
+# 🔨 AgentStudio
 
 <div align="center">
 <a href="https://pseudo-lab.com"><img src="https://img.shields.io/badge/PseudoLab-S11-3776AB" alt="PseudoLab"/></a>
