@@ -163,7 +163,7 @@ cp .env.example .env
 
 * **Gemma 통합**: 경량 로컬 모델 지원으로 온디바이스 실행 가능
 * **Microsoft Agent Framework**: Semantic Kernel 및 Azure AI Agent Service 연동
-* **Google ADK**: Gemini 네이티브 에이전트 프레임워크 지원
+* ✅ **Google ADK**: Gemini 네이티브 에이전트 프레임워크 지원
 * **CrewAI**: 멀티 에이전트 협업 워크플로우 확장
 
 ---

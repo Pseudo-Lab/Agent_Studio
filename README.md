@@ -174,7 +174,7 @@ cp .env.example .env
 
 * **Gemma Integration**: Support for lightweight, on-device local models.
 * **Microsoft Agent Framework**: Semantic Kernel & Azure AI Agent Service integration.
-* **Google ADK**: Native Gemini Agent Framework support.
+* ✅ **Google ADK**: Native Gemini Agent Framework support.
 * **CrewAI**: Multi-agent collaboration workflows.
 
 ---

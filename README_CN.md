@@ -147,7 +147,7 @@ cp .env.example .env
 
 * **Gemma 集成**: 支持轻量化端侧本地模型运行。
 * **Microsoft Agent Framework**: 集成 Semantic Kernel 与 Azure AI Agent Service。
-* **Google ADK**: 支持 Gemini 原生智能体框架。
+* ✅ **Google ADK**: 支持 Gemini 原生智能体框架。
 * **CrewAI**: 支持多智能体协作工作流。
 
 ---
