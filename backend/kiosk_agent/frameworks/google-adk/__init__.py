@@ -1,7 +1,5 @@
-"""
-Google ADK implementation (placeholder).
+"""Google ADK-based Kiosk Agent implementation."""
 
-TODO: Implement using Google Agent Development Kit
-"""
+from .agent import ADKKioskAgent, KioskAgentADK
 
-__all__ = []
+__all__ = ["ADKKioskAgent", "KioskAgentADK"]

@@ -8,7 +8,7 @@ from .config import AgentConfig, ADBConfig, ModelConfig, ScreenshotConfig
 from .types import AgentState, AgentStepResult, AgentStreamEvent, HistoryEntry
 from .core import ADBController, ActionTranslator, AndroidScreenshotter, CapturedScreen
 from .llm import BaseModelClient, GeminiClient, ChatGPTClient, LocalVLLMClient, ModelAction
-from .frameworks import KioskAgent, BaseAgent
+from .frameworks import KioskAgent, BaseAgent, ADKKioskAgent, KioskAgentADK
 from .utils import get_logger, setup_logging
 
 __version__ = "0.1.0"
@@ -38,6 +38,8 @@ __all__ = [
     # Agent
     "KioskAgent",
     "BaseAgent",
+    "ADKKioskAgent",
+    "KioskAgentADK",
     # Utils
     "get_logger",
     "setup_logging",
